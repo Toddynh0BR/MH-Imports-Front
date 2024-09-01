@@ -1,0 +1,47 @@
+.progress-circle {
+    position: relative;
+    width: 15rem;
+    height: 15rem;
+    margin: 0rem;
+  }
+  
+  .progress-circle svg {
+    transform: rotate(-90deg); /* Rotaciona o círculo para começar do topo */
+    width: 100%;
+    height: 100%;
+  }
+  
+  .progress-circle circle {
+    fill: none;
+    stroke-width: 15;
+    stroke-linecap: round;
+  }
+  
+  .progress-circle .background {
+    stroke: #e6e6e6; /* Cor de fundo do círculo */
+  }
+  
+  .progress-circle .progress {
+    stroke: #1e3483; /* Cor do progresso */
+    stroke-dasharray: 440; /* Tamanho total do traçado (2πr) */
+    stroke-dashoffset: 440; /* Inicialmente o progresso é 0 */
+    transition: stroke-dashoffset 1s ease;
+  }
+  
+  .progress-circle strong {
+    position: absolute;
+    top: 45%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    color: #1e3483;
+  }
+  
+  .progress-circle p {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 1.4rem;
+    color: #1e3483;
+  }
