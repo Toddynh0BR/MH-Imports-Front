@@ -9,7 +9,7 @@ import "swiper/css/pagination";
 import "swiper/css/scrollbar";
 import "swiper/css";
 
-import { Routes } from './Routes';
+import { Routes } from './routes';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
