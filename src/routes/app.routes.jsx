@@ -18,7 +18,7 @@ export function AppRoutes() {
       <Route path='/forgot' element={<Forgot />}/>
       <Route path='/preview/:id' element={<Product />}/>
       <Route path='/search/:index' element={<Search />}/>
-      <Route path='/redefine/:token' element={<Redefine />}/>
+      <Route path='/reset-password/:token' element={<Redefine />}/>
       { asLogin ? <Route path='/user/:local' element={<User />}/> : null}
     </Routes>
   )
