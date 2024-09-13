@@ -17,6 +17,7 @@ import product2 from "../../assets/2.jpg";
 import product3 from "../../assets/3.jpg";
 
 export function Order(){
+    const [signArea, setSign] = useState(false);
     const [isOverlayActive, setIsOverlayActive] = useState(false);
     const [orders, setOrders] = useState([
         { id: 1, img: product1, name: 'Carregador multifunções ', price: 120.50, promotion: 50, quantity: 1,},
@@ -57,10 +58,17 @@ export function Order(){
       return total.toFixed(2);
     };
 
+    function Open(){
+      setSign(true)
+    }
+    function Close(){
+      setSign(false)
+    }
+
     return(
      <S.Container>
       <Header 
-       conta={toggleOverlay}
+       conta={Open}
        openMenu={()=> setMenu(true)}
       />
 
@@ -71,8 +79,8 @@ export function Order(){
       />
 
       <Signarea 
-       isactive={isOverlayActive}
-       close={toggleOverlay}
+       isactive={signArea}
+       close={Close}
       />
 
       <S.Main>

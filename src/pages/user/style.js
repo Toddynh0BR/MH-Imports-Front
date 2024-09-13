@@ -328,6 +328,15 @@ main {
  overflow-y: auto;
  }
 
+ .nonOrders {
+  font-size: 2rem;
+  color: #001358;
+  
+  margin-top: 2rem;
+
+  align-self: center;
+ }
+
  };
 
  .password {

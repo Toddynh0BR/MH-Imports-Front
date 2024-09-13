@@ -1,20 +1,26 @@
 import * as S from "./style";
 
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { api } from "../../services/api";
 import { useState } from "react";
 
 import { Signarea } from "../../components/SignArea";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
+import { Menu } from "../../components/Menu";
 
 import { RiLockPasswordLine } from "react-icons/ri";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export function Redefine(){
+  const { token } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [signArea, setSign] = useState(false);
   const [isOverlayActive, setIsOverlayActive] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [stage, setStage] = useState(1)
+  const [menuOpen, setMenu] = useState(false);
 
   const togglePasswordVisibility = () => {
       setPasswordVisible(!passwordVisible);
@@ -26,20 +32,49 @@ export function Redefine(){
 
   async function handleDefine() {
    if (!password.trim()) return alert("Digite sua nova senha para continuar.")
+
+   if (password.length<6) return alert('Senha deve ter no mínimo 6 caracteres.')
    
-   setStage(2)
+    try {
+      setLoading(true)
+      await api.post(`/usersinfo/reset-password/${token}`, { newPassword: password });
+      setStage(2); 
+    } catch (error) {
+      setStage(1); 
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("Erro ao redefinir senha");
+      }
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  function Open(){
+    setSign(true)
+  }
+  function Close(){
+    setSign(false)
   }
 
   return(
    <S.Container>
       <Header 
-       conta={toggleOverlay}
+        conta={Open}
+        openMenu={() => setMenu(true)}
+      />
+
+      <Menu
+        close={() => setMenu(false)}
+        login={toggleOverlay}
+        menuopen={menuOpen}
       />
 
       <Signarea 
-       isactive={isOverlayActive}
-       close={toggleOverlay}
-      />
+       isactive={signArea}
+       close={Close}
+      /> 
 
       <S.Main data-eye={passwordVisible}>
         <Link to={-1}>
@@ -72,7 +107,12 @@ export function Redefine(){
            </div>
           </div>
 
-          <button onClick={handleDefine}>Continuar</button>
+          <button 
+           onClick={handleDefine}
+           disabled={loading}
+          >
+           { loading ? "Carregando..." : "Confirmar"}
+          </button>
           </>
          : 
           <>

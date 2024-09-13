@@ -2,6 +2,7 @@ import * as S from "./style";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useEffect, useState } from "react";
+import { api } from "../../services/api";
 import { Link } from "react-router-dom";
 
 import { Signarea } from "../../components/SignArea";
@@ -12,22 +13,13 @@ import { Menu } from "../../components/Menu";
 
 import { FiCheck, FiArrowUp } from "react-icons/fi";
 
-import product1 from "../../assets/1.jpg";
-import product2 from "../../assets/2.jpg";
-import product3 from "../../assets/3.jpg";
-import product4 from "../../assets/4.jpg";
-import product5 from "../../assets/5.jpg";
-import product6 from "../../assets/6.jpg";
-import product7 from "../../assets/7.jpg";
-import product8 from "../../assets/8.jpg";
-import product9 from "../../assets/9.jpg";
-import product10 from "../../assets/10.jpg";
-import product11 from "../../assets/11.jpg";
 import poster from "../../assets/poster.png";
 
 import WHATSAPP from "../../assets/whatsapp.svg";
 
 export function Home() {
+  const [signArea, setSign] = useState(false);
+  const [orderEffect, setEffect] = useState(1)
   const [isOverlayActive, setIsOverlayActive] = useState(false);
   /*ativa ou desativa a barra de rolagem quando o usuario for fazer login ou criar conta*/
   const [scrollPosition, setScrollPosition] = useState(false);
@@ -42,22 +34,7 @@ export function Home() {
   /*Categoria selecionada para mostrar produtos*/
   const [order, setOrder] = useState('Aleatorio');
   /*Ordem selecionada para mostrar os produtos*/
-  const [Products, setFinal] = useState([
-    { id: 1, img: product1, name: 'Carregador multifunções ', price: 120.50, promotion: 50, high: false, category: 'Acessórios de Celular' },
-    { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30, high: false, category: 'Utilidade' },
-    { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50, promotion: 30, high: false, category: 'Caixas de Som' }, 
-    { id: 4, img: product4, name: 'Rádio C/Bluetooth', price: 50, promotion: 10, high: true, category: 'Caixas de Som' }, 
-    { id: 5, img: product5, name: 'Copo Stanley', price: 40, promotion: 20, high: false, category: 'Utilidade' }, 
-    { id: 6, img: product6, name: 'Mini Caixa de som bluetooth', price: 30.50, promotion: 10, high: true, category: 'Caixas de Som' }, 
-    { id: 7, img: product7, name: 'Caixa de som média', price: 60., promotion: 10, high: false, category: 'Caixas de Som' }, 
-    { id: 8, img: product8, name: 'Caixa de som All Black', price: 60, promotion: null, high: true, category: 'Caixas de Som' }, 
-    { id: 9, img: product9, name: 'Relogio de escritório digital', price: 150, promotion: null, high: true, category: 'Utilidade' }, 
-    { id: 10, img: product10, name: 'Bolsa bege Gucci', price: 55.50, promotion: null, high: true, category: 'Bolsas' }, 
-    { id: 11, img: product11, name: 'Bolsa bege claro Gucci', price: 100, promotion: null, high: true, category: 'Bolsas' }, 
-    { id: 12, img: product5, name: 'Copo Stanley', price: 40, promotion: null, high: true, category: 'Utilidade' }, 
-    { id: 13, img: product6, name: 'Mini Caixa de som bluetooth', price: 30.50, promotion: null, high: false, category: 'Caixas de Som' }, 
-    { id: 14, img: product7, name: 'Caixa de som média', price: 60., promotion: null, high: false, category: 'Caixas de Som' },
-  ]);
+  const [Products, setFinal] = useState([]);
   /*Produtos recebidos da API, nunca devem ser alterados*/
   const [categories, setCategories] = useState([
     { id: 1, name: 'Acessórios de Celular' }, { id: 2, name: 'Fones de ouvido' }, { id: 3, name: 'Carregadores' }, { id: 4, name: 'Utilidade' }, { id: 5, name: 'Caixas de Som' }, { id: 6, name: 'Informática' }, { id: 7, name: 'Bolsas' },
@@ -114,7 +91,22 @@ export function Home() {
     }
   };
 
+  async function fetchCategory(){
+    const Response = await api.get("/category/")
+
+    setCategories(Response.data)
+  };
+
+  async function fetchItems(){
+   const Response = await api.post("/items/index")
+
+   setFinal(Response.data)
+   
+  };
+
   useEffect(() => {
+    fetchCategory()  
+    fetchItems()
     // Verifica o tamanho da tela na montagem do componente
     updateSlidesPerView();
     // Adiciona o event listener para redimensionamento da janela
@@ -125,11 +117,18 @@ export function Home() {
     };
   }, []);
 
+  function Open(){
+    setSign(true)
+  }
+  function Close(){
+    setSign(false)
+  }
+
   const sortedCategories = categories.sort((a, b) => b.name.length - a.name.length);
   /*organia as categorias da maior a menor para manter organizadas*/
   const promotionProducts = Products.filter(product => product.promotion !== null);
   /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem promotion*/
-  const highProducts = Products.filter(product => product.high !== false);
+  const highProducts = Products.filter(product => product.high == 'tem');
  /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem high*/
 
   useEffect(() => {
@@ -156,7 +155,8 @@ export function Home() {
   return (
     <S.Container data-show-category={scrollPosition}>
       <Header 
-       conta={toggleOverlay}
+       orderEffect={orderEffect}
+       conta={Open}
        openMenu={()=> setMenu(true)}
       />
 
@@ -167,8 +167,8 @@ export function Home() {
       />
 
       <Signarea 
-       isactive={isOverlayActive}
-       close={toggleOverlay}
+       isactive={signArea}
+       close={Close}
       />
 
       <S.Categories data-show-category={scrollPosition}>
@@ -233,62 +233,72 @@ export function Home() {
       </S.Ads>
 
       <S.Main>
-        <S.High>
-          <div className="title">
-            <span>DESTAQUES</span>
-          </div>
+        { highProducts.length ?
+                <S.High>
+                <div className="title">
+                  <span>DESTAQUES</span>
+                </div>
+      
+                <div className="highs">
+                  <Swiper
+                    pagination={false}
+                    slidesPerView={slidesPerView}
+                    spaceBetween={1}
+                    loop={true}
+                    navigation
+                    
+                  >
+                    {highProducts.map(item => (
+                      <SwiperSlide key={item.id}>
+                        <Card
+                          id={item.id}
+                          img={`${api.defaults.baseURL}/files/${item.img1}`}
+                          high={item.high}
+                          name={item.name}
+                          price={item.price}
+                          promotion={item.promotion}
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+              </S.High>
+        :
+         null
+        }
 
-          <div className="highs">
-            <Swiper
-              pagination={false}
-              slidesPerView={slidesPerView}
-              spaceBetween={1}
-              loop={true}
-              navigation
-              
-            >
-              {highProducts.map(item => (
-                <SwiperSlide key={item.id}>
-                  <Card
-                    id={item.id}
-                    img={item.img}
-                    high={item.high}
-                    name={item.name}
-                    price={item.price}
-                    promotion={item.promotion}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </S.High>
 
-        <S.Offer>
-          <div className="title">
-            <span>OFERTAS </span>
-          </div>
-          <div className="offers">
-            <Swiper
-              pagination={false}
-              slidesPerView={slidesPerView}
-              spaceBetween={1}
-              loop={true}
-              navigation
-            >
-              {promotionProducts.map(item => (
-                <SwiperSlide key={item.id}>
-                  <Card
-                    id={item.id}
-                    img={item.img}
-                    name={item.name}
-                    price={item.price}
-                    promotion={item.promotion}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        </S.Offer>
+        { promotionProducts.length ?
+                 <S.Offer>
+                 <div className="title">
+                   <span>OFERTAS </span>
+                 </div>
+                 <div className="offers">
+                   <Swiper
+                     pagination={false}
+                     slidesPerView={slidesPerView}
+                     spaceBetween={1}
+                     loop={true}
+                     navigation
+                   >
+                     {promotionProducts.map(item => (
+                       <SwiperSlide key={item.id}>
+                         <Card
+                           id={item.id}
+                           img={`${api.defaults.baseURL}/files/${item.img1}`}
+                           name={item.name}
+                           price={item.price}
+                           promotion={item.promotion}
+                           effect={()=> setEffect(prevState => [prevState + 1])}
+                         />
+                       </SwiperSlide>
+                     ))}
+                   </Swiper>
+                 </div>
+               </S.Offer>
+        :
+         null 
+        }
 
         <S.Products>
           <div className="title">
@@ -300,7 +310,7 @@ export function Home() {
               <Card
                 key={item.id}
                 id={item.id}
-                img={item.img}
+                img={`${api.defaults.baseURL}/files/${item.img1}`}
                 high={item.high}
                 name={item.name}
                 price={item.price}

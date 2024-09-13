@@ -13,9 +13,11 @@ import { Card } from "../../components/Card";
 import WHATSAPP from "../../assets/whatsapp.svg";
 
 export function Search() {
+  const [signArea, setSign] = useState(false);
   const [isOverlayActive, setIsOverlayActive] = useState(false);
   const [results, setResults] = useState([]);
   const { index } = useParams();
+  const [menuOpen, setMenu] = useState(false);
 
   function toggleOverlay() {
     setIsOverlayActive(!isOverlayActive);
@@ -29,16 +31,31 @@ export function Search() {
     }
   }, [isOverlayActive]);
 
+    
+  function Open(){
+    setSign(true)
+  }
+  function Close(){
+    setSign(false)
+  }
+
 
   return (
     <S.Container >
       <Header 
-       conta={toggleOverlay}
+       conta={Open}
+       openMenu={() => setMenu(true)}
+      />
+
+      <Menu
+       close={()=> setMenu(false)}
+       login={toggleOverlay}
+       menuopen={menuOpen}
       />
 
       <Signarea 
-       isactive={isOverlayActive}
-       close={toggleOverlay}
+       isactive={signArea}
+       close={Close}
       />
 
 

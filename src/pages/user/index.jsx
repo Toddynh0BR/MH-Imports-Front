@@ -2,11 +2,15 @@ import * as S from "./style";
 
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/auth";
+import { api } from "../../services/api";
 
 import defaultUser from "../../assets/default.svg";
 import HeaderLogo from "../../assets/Header.svg";
 import MHblack from "../../assets/MHblack.svg";
 
+import $ from 'jquery';
+import 'jquery-mask-plugin';
 
 import { ProgressCircle } from '../../components/progressCircle';
 import { FiCamera, FiEye, FiEyeOff } from "react-icons/fi";
@@ -24,12 +28,19 @@ export function User(){
     const [page, setPage] = useState(local);
     const [save, setSave] = useState(false);
 
-    const [name, setName] = useState('Matheus Augusto Gomes da Silva');
-    const [email, setEmail] = useState('galaxyplay41@gmail.com');
-    const [phone, setPhone] = useState('(81) 9970-4376');
+    const [avatar, setAvatar] = useState(defaultUser);
+    const [avatarFile, setAvatarFile] = useState(null);
 
-    const [address, setAddres] = useState('AV. Ciriaco Ramos, Manhosa, 532');
-    const [complement, setComplement] = useState('Casa com poste na frente');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+
+    const [phone, setPhone] = useState('');
+    const [address, setAddres] = useState('');
+    const [complement, setComplement] = useState('');
+
+    const [password, setPassword] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
 
     const [Orders, setOrders] = useState([
@@ -92,6 +103,7 @@ export function User(){
     ]);
     const [orders, setFilter] = useState(Orders)
 
+
     useEffect(()=> {
      if (status == 'tudo') setFilter(Orders);
      if (status == 'pendente') setFilter( Orders.filter(Orders => Orders.status == 'Pendente'))
@@ -100,18 +112,19 @@ export function User(){
      if (status == 'finalizado') setFilter( Orders.filter(Orders => Orders.status == 'Finalizado'))
      if (status == 'cancelado') setFilter( Orders.filter(Orders => Orders.status == 'Cancelado'))
 
-    }, [status])
+    }, [status])//filtrar os items do historico
+
 
     function formatCurrency(value) {
       return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    };
+    };//formatar valores como 11.5 para 11,50 e mostra-los no historico
 
     function formatDate(dateString) {
       const date = new Date(dateString.replace(' ', 'T'));
       const formattedDate = date.toLocaleDateString('pt-BR');
       const formattedTime = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       return { formattedDate, formattedTime };
-    };
+    };//formatar o horario e data
 
     function cutName(Name) {
         const nameParts = Name.split(' ');
@@ -120,7 +133,8 @@ export function User(){
             return nameParts[0];
         }
         return `${nameParts[0]} ${nameParts[1]}`;
-    };
+    };//cortar o nome de usuario para mostrar apenas primeiro e segundo nome
+
 
     useEffect(() => {
         let calculatedProgress = 0;
@@ -132,21 +146,112 @@ export function User(){
         if (complement) calculatedProgress += 20;
       
         setProgress(calculatedProgress);
-    }, [name, email, phone, address, complement]);
+    }, [name, email, phone, address, complement]);//calcular progresso
   
+
+    const validatePhone = (phone) => {
+      const phoneRegex = /^\(\d{2}\)\d{5}-\d{4}$/;
+      return phoneRegex.test(phone);
+    };//verificar se telefone é valido
+
+    const validateEmail = (email) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email); 
+    };//verificar se email está correto
+    
+
     const handleTouchStart = (e) => {
       setTouchStart(e.targetTouches[0].clientX);
     };
-  
     const handleTouchMove = (e) => {
       setTouchEnd(e.targetTouches[0].clientX);
     };
-  
     const handleTouchEnd = () => {
       if (touchStart - touchEnd > 50) {
        setMenu(false)
       }
-    };
+    };//funçoes mobal para fechar nav apenas deslizando o dedo
+
+
+    async function fetchUser(){
+      const Response = await api.get("/users")
+      
+      setName(Response.data.user.name)
+      setEmail(Response.data.user.email)
+
+      if (Response.data.user.avatar) {
+        setAvatar(`${api.defaults.baseURL}/files/${Response.data.user.avatar}`);
+      }
+      const ResponseInfo = await api.get("/usersinfo")
+      
+      if (ResponseInfo.data) {
+        setPhone(ResponseInfo.data.user_info.phone || '')
+        setAddres(ResponseInfo.data.user_info.address || '')
+        setComplement(ResponseInfo.data.user_info.complement || '')
+      }
+    };//pegar informaçoes do usuario 
+
+    async function fetchOrders(){
+      const Response = await api.get('/orders');
+
+      if (!Response.data) return setOrders([]);
+      setOrders(Response.data)
+    }
+
+    async function handleUpdate(){
+      if (!name.trim())  return alert('Nome não pode ficar vazio');
+      if (!email.trim()) return alert('Email não pode ficar vazio');
+
+      if (phone || address || complement){
+        if (!validatePhone(phone)) return alert('Digite um numero de telefone válido');
+
+        await api.post("/usersinfo", { phone, address, complement})
+      };
+
+      if (!validateEmail(email)) return alert('Digite um email válido');
+      
+      await api.put("/users", { name, email })
+
+      if (avatarFile) {
+        const fileForm = new FormData();
+        fileForm.append("avatar", avatarFile);
+
+        await api.patch("/users/avatar", fileForm);
+        
+      }
+
+      alert("Dados atualizados com sucesso");
+      setSave(false);
+      fetchUser();
+    };//atualizar informaçoes do usuario
+
+    async function handleUpdatePass(){
+     if (!password || !oldPassword || !confirmPassword) return alert('Preencha todos os campos');
+
+     if (password != confirmPassword) return alert('Senha de confirmação não condiz com nova senha');
+
+     if (password.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
+     try {
+      await api.put("/users", { email, password, old_password: oldPassword });
+
+      alert("Senha alterada com sucesso")
+     } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert('Erro ao alterar senha')
+      }
+     }
+   
+
+    };//mudar senha
+
+    useEffect(() => {
+        fetchOrders()
+        fetchUser()
+       
+        $('#phone').mask('(99)99999-9999');
+    }, []);//adiciona a mascara no input de telefone
 
     return(
      <S.Container data-menu={menuOpen}>
@@ -163,10 +268,23 @@ export function User(){
        onTouchMove={handleTouchMove}
        onTouchEnd={handleTouchEnd}>
        <div className="img">
-        <img src={defaultUser} alt="imagem do usuario" />
+        <img src={avatar} alt="imagem do usuario" />
         <label htmlFor="avatar">
          <FiCamera />
-         <input type="file" name="avatar" accept="image/*" id="avatar"/>
+         <input 
+          type="file" 
+          name="avatar" 
+          accept="image/*" 
+          id="avatar"
+          onChange={e => {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+
+            const imagePreview = URL.createObjectURL(file);
+            setAvatar(imagePreview);
+            setSave(true)
+          }} 
+         />
         </label>
        </div>
 
@@ -215,13 +333,13 @@ export function User(){
 
           <div className="input-wrapper">
             <label htmlFor="phone">Telefone</label>
-            <input 
-             type="text" 
+            <input
              id="phone" 
-             defaultValue={phone}
-             placeholder="Seu numero de telefone"
-             onChange={(e) => {setPhone(e.target.value); setSave(true)}} 
+             defaultValue={phone} 
+             placeholder="(99)99999-9999" 
+             onChange={(e) => {setPhone(e.target.value); console.log(e.target.value); setSave(true)}} 
             />
+
           </div>
 
           <div className="input-wrapper">
@@ -253,7 +371,7 @@ export function User(){
           <ProgressCircle progress={progress}/>
          </div>
     
-         <div className="save" data-save={save}>
+         <div className="save" data-save={save} onClick={handleUpdate}>
            <p>Salvar</p>
          </div> 
         
@@ -299,7 +417,7 @@ export function User(){
 
           <div className="main">
 
-            {
+            { orders.length ? 
              orders.map(order => (
               <S.Order>
               <div className="orderHeader">
@@ -333,6 +451,9 @@ export function User(){
              
              </S.Order>
              ))
+
+             :
+             <h3 className="nonOrders">Nenhum pedido realizado ainda</h3>
             }
 
           </div>
@@ -346,20 +467,35 @@ export function User(){
           
           <div className="input-wrapper">
            <label htmlFor="senhaAntiga">Senha antiga</label>
-           <input type="password" name="senhaAntiga" placeholder="Senha antiga" />
+           <input 
+            type="password" 
+            name="senhaAntiga" 
+            placeholder="Senha antiga" 
+            onChange={(e)=> setOldPassword(e.target.value)}
+           />
          </div>
 
          <div className="input-wrapper">
-           <label htmlFor="senhaAntiga">Nova senha</label>
-           <input type="password" name="senhaAntiga" placeholder="Deve ter no mínimo 8 caracteres" />
+           <label htmlFor="senhaNova">Nova senha</label>
+           <input 
+            type="password" 
+            name="senhaNova" 
+            onChange={(e)=> setPassword(e.target.value)}
+            placeholder="Deve ter no mínimo 6 caracteres" 
+           />
          </div>
 
          <div className="input-wrapper">
-           <label htmlFor="senhaAntiga">Confirme a senha</label>
-           <input type="password" name="senhaAntiga" placeholder="Confirme a senha" />
+           <label htmlFor="senhaConfirm">Confirme a senha</label>
+           <input 
+            type="password" 
+            name="senhaConfirm" 
+            placeholder="Confirme a senha" 
+            onChange={(e)=> setConfirmPassword(e.target.value)}
+           />
          </div>
 
-         <button>
+         <button onClick={handleUpdatePass}>
            Salvar
          </button>
         </div>

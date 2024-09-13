@@ -168,6 +168,11 @@ box-shadow: 0px 0px 37px -4px rgba(64,169,255,1);
   &:hover {
   filter: brightness(85%); 
   }
+
+  &:disabled{
+   cursor: no-drop;
+   filter: brightness(50%);
+  }
  }
 
  .BottomSpan {

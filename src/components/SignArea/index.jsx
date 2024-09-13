@@ -1,5 +1,7 @@
 import * as S from "./style";
 
+import { useAuth } from "../../hooks/auth";
+import { api } from "../../services/api";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
@@ -8,10 +10,78 @@ import Icon from "../../assets/Icon.svg";
 
 export function Signarea({close, isactive= false}){
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const [signin, setSignIn] = useState(true)
+    const [loading, setLoading] = useState(false);
+    const [signin, setSignIn] = useState(true);
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password,setPassword] = useState('');
+
+    const { signIn } = useAuth();
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
+    };
+
+    const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    async function handleLogin() {
+      if (!email.trim() || !password.trim()) {
+          return alert('Preencha todos os campos');
+      }
+  
+      try {
+          setLoading(true);
+          await signIn({ email, password, close });
+          
+         
+      } catch (error) {
+          
+          if (error.response && error.response.status === 401) {
+              alert("E-mail e/ou senha incorreta");
+          } else {
+              alert('Não foi possível fazer login');
+          }
+      } finally {
+          setLoading(false);
+      }
+    }
+
+    async function handleCreate(){
+     if (!name.trim() && !email.trim() && !password.trim()){
+        return alert('Preencha todos os campos')
+     };
+
+     if (!validateEmail(email)){
+        return alert('Digite um email válido')
+     };
+
+     if (password.trim().length < 6) {
+        return alert("Senha deve ter no mínimo 6 caracteres")
+     }
+
+     setLoading(true) 
+
+     await api.post("/users", {name, email, password})
+        
+     .then(()=> {
+            alert("Usuário cadastrado com sucesso!")
+            setLoading(false)
+            close()
+            signIn({ email, password})
+          })
+     .catch(error => {
+       if(error.response){
+         alert(error.response.data.message);
+       }else {
+         alert("Não foi possivel cadastrar o usuário.")
+       }
+       setLoading(false)
+     })
+     
     };
 
     return(
@@ -31,7 +101,12 @@ export function Signarea({close, isactive= false}){
           <div className="gradiantBorder">
            <div className="input-wrapper">
             <FiUser />
-            <input type="text" name="name" placeholder="Nome" />
+            <input 
+             type="text" 
+             name="name" 
+             placeholder="Nome" 
+             onChange={(e)=> setName(e.target.value)}
+            />
            </div>
           </div>
         </>
@@ -41,7 +116,12 @@ export function Signarea({close, isactive= false}){
         <div className="gradiantBorder">
          <div className="input-wrapper">
           <FiMail />
-          <input type="email" name="email" placeholder="Email" />
+          <input 
+           type="email" 
+           name="email" 
+           placeholder="Seu Email" 
+           onChange={(e)=> setEmail(e.target.value)}
+          />
          </div>
         </div>
          
@@ -49,7 +129,13 @@ export function Signarea({close, isactive= false}){
         <div className="gradiantBorder">
          <div className="input-wrapper">
           <FiLock />
-          <input type={passwordVisible ? "text" : "password"} name="senha" placeholder="Senha" autocomplete="off"/>
+          <input 
+           name="senha" 
+           placeholder={ signin ? 'Sua senha' : 'No mínimo 6 caracteres'}
+           autoComplete="off"
+           type={passwordVisible ? "text" : "password"} 
+           onChange={(e)=> setPassword(e.target.value)}
+          />
           <div className="Eyes">
            <FiEye 
             className="eye"
@@ -69,8 +155,11 @@ export function Signarea({close, isactive= false}){
        
 
       
-         <button>
-          <p>{ signin ? 'Login' : 'Criar conta'}</p>
+         <button 
+          onClick={ signin ? handleLogin : handleCreate}
+          disabled={loading} 
+         >
+          <p>{ loading ? 'carregando...' : signin ? 'Login' : 'Criar conta'}</p>
          </button>
 
          { signin ? 

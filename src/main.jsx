@@ -1,7 +1,8 @@
 import { register } from "swiper/element-bundle";
 import { createRoot } from 'react-dom/client';
-import GlobalStyle from './style/global';
 import { StrictMode, useEffect } from 'react';
+import { AuthProvider } from './hooks/auth';
+import GlobalStyle from './style/global';
 import { Routes } from './routes';
 
 register();
@@ -33,7 +34,9 @@ function App() {
   return (
     <StrictMode>
       <GlobalStyle />
-      <Routes />
+       <AuthProvider> 
+        <Routes />
+       </AuthProvider> 
     </StrictMode>
   );
 }

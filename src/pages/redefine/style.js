@@ -62,6 +62,11 @@ padding: 5rem;
  cursor: pointer;
  color: #001358;
  }
+
+ &:disabled {
+ opacity: 50%;
+ cursor: no-drop;
+ }
  }
 
  svg {

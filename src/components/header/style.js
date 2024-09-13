@@ -86,8 +86,10 @@ img {
  }
 
  .userIcon{
-  width: 5rem;
   height: 5rem;
+  width: 5rem;
+
+  border-radius: 50%;
  }
  }
 
@@ -300,9 +302,15 @@ img {
   flex-direction: column;
   display: flex;
 
-
   overflow: auto;
 
+  a:nth-child(odd) {
+   background-color: #f0f7fb;
+  }
+
+  a:nth-child(even) {
+   background-color: #fff;
+  }
   .item {
    height: 6rem;
    width: 100%;
@@ -320,6 +328,10 @@ img {
     border-radius: .3rem;
   }
 
+  span {
+   font-size: 1.2rem;
+   color: #001358;
+  }
   strong {
    font-size: 1.3rem;
    color: #001358;
@@ -349,7 +361,6 @@ img {
  }
  }
 }
-
 
 .menu {
  display: none;

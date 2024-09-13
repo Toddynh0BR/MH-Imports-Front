@@ -1,7 +1,9 @@
 import * as S from "./style";
 
+import { useEffect, useState } from "react";
+import { useAuth } from "../../hooks/auth";
+import { api } from "../../services/api";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import defaultUser from "../../assets/default.svg";
@@ -9,24 +11,28 @@ import { RiEmotionSadLine } from "react-icons/ri";
 import Logo from "../../assets/Header.svg";
 import { IoMenu } from "react-icons/io5";
 
-import product1 from "../../assets/1.jpg";
-import product2 from "../../assets/2.jpg";
-import product3 from "../../assets/3.jpg";
-
 import { Input } from "../Input";
 
-export function Header({conta, openMenu}){
-  const [asLogin, setAsLogin] = useState(true);
-  /*verifica se o usuario esta ou nao logado*/
+export function Header({conta, openMenu, orderEffect}){
+  const { user, Logout } = useAuth();
+
+  const [avatar, setAvatar] = useState(defaultUser);
+
+  async function fetchAvatar(){
+    const Response = await api.get("/users")
+
+    if (Response.data.user.avatar) {
+      setAvatar(`${api.defaults.baseURL}/files/${Response.data.user.avatar}`);
+    } else {
+      setAvatar(defaultUser)
+    }
+  };
+
+  const [asLogin, setAsLogin] = useState(false);
   const [results, setResults] = useState([
 
   ]);
   const [orders, setOrders] = useState([
-    { id: 1, img: product1, name: 'Carregador multifunções ', price: 120.50, promotion: 50},
-    { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30},
-    { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50}, 
-    { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30},
-    { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50}, 
   ])
 
    function formatarComoDecimal(valor) {
@@ -37,6 +43,32 @@ export function Header({conta, openMenu}){
    
        return formatador.format(valor);
    };
+
+   function fetchOrders(){
+
+    const nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
+
+    if(nowItems) {
+      setOrders(nowItems)
+    } else {
+      setOrders([])
+    }
+   }
+
+   useEffect(()=> {
+    setAsLogin( user ? true : false )
+
+    if (!user) {
+      setAvatar(defaultUser)
+    }
+    if (user) {
+      fetchAvatar()
+    }
+   },[user])
+
+   useEffect(()=> {
+    fetchOrders()
+   },[orderEffect])
 
     return(
      <S.Container>
@@ -74,7 +106,7 @@ export function Header({conta, openMenu}){
          <FiShoppingCart />
         </Link>
         <div className="HoverCart">
-         <div class="arrow-up"></div>
+         <div className="arrow-up"></div>
 
 
         { orders.length ? 
@@ -83,12 +115,9 @@ export function Header({conta, openMenu}){
             <Link to={`preview/${item.id}`} key={item.id}>
              <div className="item" >
               <img src={item.img} alt="imagem do produto" />
+              <span>{item.quantity}x </span>
               <strong>{item.name}</strong>
-              <p>R${ item.promotion ? 
-                  formatarComoDecimal( item.price - (item.price * item.promotion) / 100 )
-                 :
-                  formatarComoDecimal(item.price)
-              }</p>
+              <p>R${formatarComoDecimal(item.total)}</p>
              </div>
             </Link>
           ))}
@@ -108,13 +137,17 @@ export function Header({conta, openMenu}){
        </div>
 
        <div className="User">
-       <img src={defaultUser} alt="Imagem do usuario" className="userIcon"/>
+       <img src={avatar} alt="Imagem do usuario" className="userIcon"/>
 
         <div className="HoverUser">
-        <div class="arrow-up"></div>
+        <div className="arrow-up"></div>
         { asLogin ? <Link to='/user/profile'><span>Minha conta</span></Link> : <span onClick={conta}>Fazer login</span>}
         { asLogin ? <Link to='/user/shopping'><span>Minhas Compras</span></Link> : <span onClick={conta}>Minhas Compras</span>}
-        { asLogin ? <span>Sair</span> :  <span>Sair</span>}
+        { asLogin ? <span onClick={()=> {
+          Logout()
+          window.location.reload();
+          setAvatar(defaultUser)
+        }}>Sair</span> :  <span>Sair</span>}
         
         </div>
        </div>

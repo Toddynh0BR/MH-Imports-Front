@@ -63,7 +63,7 @@ padding: 4rem;
 
 
  .img0 {
- height: 100%;
+ height: 45rem;
  width: 100%;
  grid-area: img0;
  }
@@ -87,6 +87,20 @@ padding: 4rem;
  border-style: solid;
  border-width: 3px;
  cursor: pointer;
+ }
+}
+
+.price {
+ align-items: center;
+ display: flex;
+ gap: .5rem;
+
+ .promotion {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #40a9ff;
+  padding-bottom: .3rem;
+
  }
 }
 
