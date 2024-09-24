@@ -68,7 +68,7 @@ export function Footer(){
 
       <div className="Description">
         <p>MH IMPORTS</p>
-        <a href="https://maps.app.goo.gl/MGqPigqRmyN5ZRWs9"  target='blank'><img src={MAPS} alt="maps" /> AV. Severino Manoel dos Santos, GALERIA Ferreira, 04, Pão de Açucar, PE</a>
+        <a href="https://maps.app.goo.gl/gbJ42tEqocUNBhE7A"  target='blank'><img src={MAPS} alt="maps" /> AV. Severino Manoel dos Santos, GALERIA Ferreira, 04, Pão de Açucar, PE</a>
          <a href="https://portfolio-toddy.netlify.app/" target='blank'>Feito por Matheus Augusto</a>
        
       </div>

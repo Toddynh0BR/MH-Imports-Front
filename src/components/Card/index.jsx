@@ -1,14 +1,31 @@
 import * as S from "./style";
+
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/auth";
+import { api } from "../../services/api";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import Swal from "sweetalert2";
 
 import { BsLightningFill } from "react-icons/bs";
 import { FiPlus } from "react-icons/fi";
 
-export function Card({ id, img, name, price, promotion, effect}) {
+export function Card({ id, img, name, price, promotion, effect }) {
     const [finalPrice, setFinal] = useState(promotion ? addPromotion() : price);
     const { user } = useAuth();
+    const [variation, setVariation] = useState([
+    ]);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
 
     function addPromotion() {
         const valor = price; 
@@ -26,9 +43,18 @@ export function Card({ id, img, name, price, promotion, effect}) {
         return formatador.format(valor);
     };
 
+    async function fetchVariation() {
+     const Response = await api.get(`/variation/${id}`);
+
+     if (Response.data) setVariation(Response.data)
+    };
+
     async function handleAddOrder() {
 
         const itemPrice = promotion ? addPromotion() : price;
+
+        const actualVariation = variation.length ? variation[0].name : '';
+
 
         const Order = {
             id,
@@ -36,6 +62,7 @@ export function Card({ id, img, name, price, promotion, effect}) {
             name,
             price,
             promotion,
+            variation: actualVariation,
             quantity: 1,
             total: itemPrice 
         };
@@ -43,8 +70,7 @@ export function Card({ id, img, name, price, promotion, effect}) {
        
 
             let nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
-
-            const existingItemIndex = nowItems.findIndex(item => item.id === id);
+            const existingItemIndex = nowItems.findIndex(item => item.id === Number(id) && item.variation == actualVariation);
 
             if (existingItemIndex !== -1) {
 
@@ -55,11 +81,19 @@ export function Card({ id, img, name, price, promotion, effect}) {
                 nowItems.push(Order);
             }
 
+            Toast.fire({
+                icon: "success",
+                title: "Item adicionado ao carrinho"
+              }); 
+                        
             effect()
-            alert("Item adicionado ao carrinho")
             localStorage.setItem('@Items', JSON.stringify(nowItems));
-
+            
     };
+
+    useEffect(()=> {
+     fetchVariation() 
+    }, [])
 
     return (
         <Link to={`/preview/${id}`}>

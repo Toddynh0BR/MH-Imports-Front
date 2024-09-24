@@ -3,7 +3,7 @@ import * as S from "./style";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/auth";
 import { api } from "../../services/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import defaultUser from "../../assets/default.svg";
@@ -15,25 +15,18 @@ import { Input } from "../Input";
 
 export function Header({conta, openMenu, orderEffect}){
   const { user, Logout } = useAuth();
+  const navigate = useNavigate();
 
+  const [typingTimeout, setTypingTimeout] = useState(null);
   const [avatar, setAvatar] = useState(defaultUser);
-
-  async function fetchAvatar(){
-    const Response = await api.get("/users")
-
-    if (Response.data.user.avatar) {
-      setAvatar(`${api.defaults.baseURL}/files/${Response.data.user.avatar}`);
-    } else {
-      setAvatar(defaultUser)
-    }
-  };
-
   const [asLogin, setAsLogin] = useState(false);
+  const [index, setIndex] = useState('');
+
   const [results, setResults] = useState([
 
   ]);
   const [orders, setOrders] = useState([
-  ])
+  ]);
 
    function formatarComoDecimal(valor) {
        const formatador = new Intl.NumberFormat('pt-BR', {
@@ -42,6 +35,16 @@ export function Header({conta, openMenu, orderEffect}){
        });
    
        return formatador.format(valor);
+   };
+
+   async function fetchAvatar(){
+    const Response = await api.get("/users")
+
+    if (Response.data.user.avatar) {
+      setAvatar(`${api.defaults.baseURL}/files/${Response.data.user.avatar}`);
+    } else {
+      setAvatar(defaultUser)
+    }
    };
 
    function fetchOrders(){
@@ -53,7 +56,55 @@ export function Header({conta, openMenu, orderEffect}){
     } else {
       setOrders([])
     }
-   }
+   };
+
+   async function handleSearch(value) {
+    if (!value.trim()) return;
+
+    Response = await api.post("/items/index", { index: value })
+
+    if (Response.data) {
+      const filteredResponse = Response.data.filter(item => item.status !== 0)
+      setResults(filteredResponse)
+    }
+   };
+
+   function handleInputChange(event) {
+    const value = event.target.value;
+    if (!value.trim()) setResults([])
+    setIndex(value);
+
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+
+    const newTimeout = setTimeout(() => {
+      handleSearch(value);
+    }, 500); 
+
+    setTypingTimeout(newTimeout);
+   };//executa sempre que o usuario digita, servindo para fazer a busca apos certo tempo de inatividade,
+     //setando o results como [ ] caso o input esteja vazio, e etc
+
+   function handleEnterPress(event) {
+
+    if (event.key === 'Enter') {
+     if (!index.trim()) return;
+
+     setIndex('')
+     setResults([])
+     navigate(`/search/${index}`)
+    }
+   };
+
+   function handleClickSearch() {
+    if (!index.trim()) return;
+
+    
+    setIndex('')
+    setResults([])
+    navigate(`/search/${index}`)
+   };
 
    useEffect(()=> {
     setAsLogin( user ? true : false )
@@ -64,11 +115,11 @@ export function Header({conta, openMenu, orderEffect}){
     if (user) {
       fetchAvatar()
     }
-   },[user])
+   },[user]);
 
    useEffect(()=> {
     fetchOrders()
-   },[orderEffect])
+   },[orderEffect]);
 
     return(
      <S.Container>
@@ -79,6 +130,10 @@ export function Header({conta, openMenu, orderEffect}){
       <div className="inputArea">
        <Input
         icon={FiSearch}
+        value={index}
+        clickIcon={handleClickSearch}
+        onKeyDown={handleEnterPress}
+        onChange={handleInputChange}
         placeholder="Buscar na MH Imports"
        />
        
@@ -112,11 +167,12 @@ export function Header({conta, openMenu, orderEffect}){
         { orders.length ? 
          <div className="FilledCart">
           { orders.map(item => (
-            <Link to={`preview/${item.id}`} key={item.id}>
+            <Link to={`/preview/${item.id}`} key={item.id}>
              <div className="item" >
               <img src={item.img} alt="imagem do produto" />
               <span>{item.quantity}x </span>
-              <strong>{item.name}</strong>
+              <strong>{item.name} <span>{item.variation}</span></strong>
+              
               <p>R${formatarComoDecimal(item.total)}</p>
              </div>
             </Link>

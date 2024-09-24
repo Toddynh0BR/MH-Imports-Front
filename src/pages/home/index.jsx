@@ -1,9 +1,9 @@
 import * as S from "./style";
 
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useEffect, useState } from "react";
 import { api } from "../../services/api";
-import { Link } from "react-router-dom";
 
 import { Signarea } from "../../components/SignArea";
 import { Header } from "../../components/header";
@@ -13,7 +13,8 @@ import { Menu } from "../../components/Menu";
 
 import { FiCheck, FiArrowUp } from "react-icons/fi";
 
-import poster from "../../assets/poster.png";
+import NonMobal from "../../assets/Icon.svg";
+import Non from "../../assets/MHblack.svg";
 
 import WHATSAPP from "../../assets/whatsapp.svg";
 
@@ -26,7 +27,7 @@ export function Home() {
   /*define se os componentes Category, OrdeBy e Swiper quando a scroll estiver na posição scrollDefine(1100)*/
   const [slidesPerView, setSlidesPerView] = useState(5.5);
   //
-  const [scrollDefine, setScrollDefine] = useState(1100);
+  const [scrollDefine, setScrollDefine] = useState(500);
   /*posição do scroll quando chegar em products*/
   const [filteredProducts, setFilter] = useState([]);
   /*Array dos produtos filtrados por categoria e ordem,para nao precisar alterar os products*/
@@ -36,11 +37,12 @@ export function Home() {
   /*Ordem selecionada para mostrar os produtos*/
   const [Products, setFinal] = useState([]);
   /*Produtos recebidos da API, nunca devem ser alterados*/
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Acessórios de Celular' }, { id: 2, name: 'Fones de ouvido' }, { id: 3, name: 'Carregadores' }, { id: 4, name: 'Utilidade' }, { id: 5, name: 'Caixas de Som' }, { id: 6, name: 'Informática' }, { id: 7, name: 'Bolsas' },
-  ])
+  const [categories, setCategories] = useState([]);
   /*categorias recebidas da API, nunca devem ser alteradas*/
   const [menuOpen, setMenu] = useState(false);
+  const [postersMobal, setMobalPoster] = useState([])
+  const [posterDesk, setDeskPoster] = useState([])
+  const [poster, setPoster] = useState(false);
 
   function scrollToTop() {
     window.scrollTo({
@@ -49,11 +51,6 @@ export function Home() {
     });
   };
   /*Leva o usuario para o topo da tela*/
-
-  function toggleOverlay() {
-    setIsOverlayActive(!isOverlayActive);
-  };
-  /*seta a const IsOverleyActive para desativar a scroll*/
 
   useEffect(() => {
     if (isOverlayActive) {
@@ -100,12 +97,26 @@ export function Home() {
   async function fetchItems(){
    const Response = await api.post("/items/index")
 
-   setFinal(Response.data)
-   
+   const filteredResponse = Response.data.filter(item => item.status !== 0)
+   setFinal(filteredResponse)
+  };
+
+  async function fetchPosters(){
+   const Response = await api.get("/poster")
+
+   if (Response.data) {
+    const MobalFilter = Response.data.filter(item => item.img.includes("mobal"));
+    const DesktopFilter = Response.data.filter(item => !item.img.includes("mobal"));
+
+    setDeskPoster(DesktopFilter.length ? DesktopFilter : []);
+    setMobalPoster(MobalFilter.length ? MobalFilter : []);
+    setPoster(true)
+   }
   };
 
   useEffect(() => {
     fetchCategory()  
+    fetchPosters()
     fetchItems()
     // Verifica o tamanho da tela na montagem do componente
     updateSlidesPerView();
@@ -126,9 +137,9 @@ export function Home() {
 
   const sortedCategories = categories.sort((a, b) => b.name.length - a.name.length);
   /*organia as categorias da maior a menor para manter organizadas*/
-  const promotionProducts = Products.filter(product => product.promotion !== null);
+  const promotionProducts = Products.filter(product => product.promotion !== 0 && product.promotion !== null);
   /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem promotion*/
-  const highProducts = Products.filter(product => product.high == 'tem');
+  const highProducts = Products.filter(product => product.high == 1);
  /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem high*/
 
   useEffect(() => {
@@ -162,7 +173,7 @@ export function Home() {
 
       <Menu
        close={()=> setMenu(false)}
-       login={toggleOverlay}
+       login={Open}
        menuopen={menuOpen}
       />
 
@@ -226,10 +237,54 @@ export function Home() {
         </div>
       </S.Categories>
 
+
       <S.Ads>
-        <div className="ads">
-          <img src={poster} alt="anuncio" />
-        </div>
+         <div className="ads">
+            { slidesPerView == 5.5 ? 
+             posterDesk.length ?
+              posterDesk.map(poster => (
+                <Swiper
+                 pagination={false}
+                 slidesPerView={1}
+                 spaceBetween={30} 
+                 loop={true}
+                 modules={[Autoplay, Pagination, Navigation]}
+                 autoplay={{ delay: 5000, disableOnInteraction: false }} 
+                 speed={1000} 
+                >
+                 <SwiperSlide key={poster.id}>
+                  <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
+                 </SwiperSlide>
+                </Swiper>
+              ))
+             :
+              <div className="nonADS">
+               <img src={Non} alt="MHimports" />
+              </div>
+            :
+             postersMobal.length ?
+              postersMobal.map(poster => (
+                <Swiper
+                 pagination={false}
+                 slidesPerView={1}
+                 spaceBetween={30} 
+                 loop={true}
+                 modules={[Autoplay, Pagination, Navigation]}
+                 autoplay={{ delay: 5000, disableOnInteraction: false }} 
+                 speed={1000} 
+                >
+                 <SwiperSlide key={poster.id}>
+                  <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
+                 </SwiperSlide>
+                </Swiper>
+              ))
+             :
+             <div className="nonADSM">
+              <img src={NonMobal} alt="MHimports" />
+             </div>
+            }     
+
+         </div>
       </S.Ads>
 
       <S.Main>
@@ -257,6 +312,7 @@ export function Home() {
                           name={item.name}
                           price={item.price}
                           promotion={item.promotion}
+                          effect={()=> setEffect(prevState => [prevState + 1])}
                         />
                       </SwiperSlide>
                     ))}
@@ -315,6 +371,7 @@ export function Home() {
                 name={item.name}
                 price={item.price}
                 promotion={item.promotion}
+                effect={()=> setEffect(prevState => [prevState + 1])}
               />
             ))}
           </div>

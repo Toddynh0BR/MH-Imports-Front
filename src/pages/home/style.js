@@ -61,6 +61,7 @@ width: 100%;
 justify-content: center;
 align-items: center;
 display: flex;
+position: relative;
 
 margin-top: 12rem;
 
@@ -71,19 +72,54 @@ background-color: #f0f7fb;
 .ads {
  width: 120rem;
  height: 30rem;
-
- background-color: #40a9ff;
  border-radius: .4rem;
+
+
+ .swiper {
+  width: 100%;
+  height: 100%;
+  border-radius: .4rem;
 
  img {
  width: 100%;
  height: 100%;
  border-radius: .4rem;
  }
+
+ }
+
 }
 
 @media (max-width: 450px){
- display: none;
+ .ads {
+ width: 35rem;
+ height: 30rem;
+
+ .swiper {
+  width: 35rem;
+  height: 30rem;
+  overflow: hidden;
+
+ img {
+  width: 100%;  
+  height: 100%;    
+  object-fit: cover; 
+ }
+
+ }
+
+ .nonADSM {
+  width: 30rem;
+  height: 25rem;
+  margin: auto;
+  img {
+    height: 100%;
+    width: 100%;
+  }
+ }
+}
+
+
 }
 `
 
@@ -97,7 +133,7 @@ gap: 2rem;
 
 padding: 4rem 3rem;
 @media (max-width: 450px){
- margin-top: 13rem;
+ margin-top: 5rem;
  padding: 2rem 1rem;
 }
 `

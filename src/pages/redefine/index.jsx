@@ -3,6 +3,7 @@ import * as S from "./style";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../../services/api";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 import { Signarea } from "../../components/SignArea";
 import { Header } from "../../components/header";
@@ -22,19 +23,33 @@ export function Redefine(){
   const [stage, setStage] = useState(1)
   const [menuOpen, setMenu] = useState(false);
 
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  });
+
   const togglePasswordVisibility = () => {
       setPasswordVisible(!passwordVisible);
   };
 
-  function toggleOverlay() {
-    setIsOverlayActive(!isOverlayActive);
-  };
-
   async function handleDefine() {
-   if (!password.trim()) return alert("Digite sua nova senha para continuar.")
+   if (!password.trim()) return Toast.fire({
+    icon: "warning",
+    title: "Digite sua nova senha para continuar."
+  }); 
 
-   if (password.length<6) return alert('Senha deve ter no mínimo 6 caracteres.')
-   
+   if (password.length<6) return Toast.fire({
+    icon: "warning",
+    title: 'Senha deve ter no mínimo 6 caracteres.'
+  });  
+
     try {
       setLoading(true)
       await api.post(`/usersinfo/reset-password/${token}`, { newPassword: password });
@@ -42,9 +57,15 @@ export function Redefine(){
     } catch (error) {
       setStage(1); 
       if (error.response) {
-        alert(error.response.data.message);
+        Toast.fire({
+          icon: "error",
+          title: error.response.data.message
+        });  
       } else {
-        alert("Erro ao redefinir senha");
+        Toast.fire({
+          icon: "error",
+          title: "Erro ao redefinir senha"
+        });  
       }
     } finally {
       setLoading(false)
@@ -67,7 +88,7 @@ export function Redefine(){
 
       <Menu
         close={() => setMenu(false)}
-        login={toggleOverlay}
+        login={Open}
         menuopen={menuOpen}
       />
 

@@ -41,16 +41,9 @@ padding: 4rem;
  height: fit-content;
  width: 45rem;
 
- display: grid;
- grid-template-columns: repeat(4, 1fr);
- grid-template-rows: repeat(5, 1fr);
- grid-template-areas: 
- 'img1 img0 img0 img0'
- 'img2 img0 img0 img0'
- 'img3 img0 img0 img0'
- 'img4 img0 img0 img0'
- 'img5 img0 img0 img0'
- ;
+ flex-direction: row-reverse;
+ align-items: center;
+ display: flex;
  gap: 1.5rem;
 
  img {
@@ -59,28 +52,20 @@ padding: 4rem;
 
  border-radius: .4rem;
  object-fit: cover;
+ overflow: hidden;
  }
 
+ .lateralImg {
+ height: 45rem;
+ flex-direction: column;
+ display: flex;
+ gap: .5rem;
+ }
 
  .img0 {
  height: 45rem;
- width: 100%;
- grid-area: img0;
- }
- .img1 {
- grid-area: img1;
- }
- .img2 {
- grid-area: img2;
- } 
- .img3 {
- grid-area: img3;
- }
- .img4 {
- grid-area: img4;
- }
- .img5 {
- grid-area: img5;
+ width: 45rem;
+ object-fit: cover;
  }
  .img1, .img2, .img3, .img4, .img5 {
  border-color: #f0f7fb;
@@ -335,19 +320,14 @@ padding: 4rem;
 
 .imgs {
  height: fit-content;
- width: 18rem;
+ width: 100%;
 
- display: grid;
- grid-template-columns: repeat(5, 1fr);
- grid-template-rows: repeat(5, 1fr);
- grid-template-areas: 
- 'img0 img0 img0 img0 img0'
- 'img0 img0 img0 img0 img0'
- 'img0 img0 img0 img0 img0'
- 'img0 img0 img0 img0 img0'
- 'img1 img2 img3 img4 img5'
- ;
- gap: 1.5rem;
+ margin: auto;
+ justify-content: center;
+ flex-direction: column;
+ align-items: center;
+ display: flex;
+ gap: .5rem;
 
  img {
  height: 6rem;
@@ -357,26 +337,18 @@ padding: 4rem;
  object-fit: cover;
  }
 
+ .lateralImg {
+ height: 6rem;
+ flex-direction: row;
+ align-items: center;
+ display: flex;
+ gap: .2rem;
+ }
+
 
  .img0 {
- height: 100%;
- width: 100%;
- grid-area: img0;
- }
- .img1 {
- grid-area: img1;
- }
- .img2 {
- grid-area: img2;
- } 
- .img3 {
- grid-area: img3;
- }
- .img4 {
- grid-area: img4;
- }
- .img5 {
- grid-area: img5;
+ height: 30rem;
+ width: 30rem;
  }
  .img1, .img2, .img3, .img4, .img5 {
  border-color: #f0f7fb;

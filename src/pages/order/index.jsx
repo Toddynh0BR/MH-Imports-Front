@@ -1,6 +1,9 @@
 import * as S from "./style";
 
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/auth";
+import { api } from "../../services/api";
 import InputMask from 'react-input-mask';
 import { Link } from "react-router-dom";
 
@@ -12,31 +15,60 @@ import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
 import { Menu } from "../../components/Menu";
 
-import product1 from "../../assets/1.jpg";
-import product2 from "../../assets/2.jpg";
-import product3 from "../../assets/3.jpg";
+import Swal from "sweetalert2";
 
 export function Order(){
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
     const [signArea, setSign] = useState(false);
+    const [orderEffect, setOrderEffect] = useState(1);
     const [isOverlayActive, setIsOverlayActive] = useState(false);
-    const [orders, setOrders] = useState([
-        { id: 1, img: product1, name: 'Carregador multifunções ', price: 120.50, promotion: 50, quantity: 1,},
-        { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30, quantity: 1, },
-        { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50, quantity: 5,  }, 
-        { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30, quantity: 2,  },
-        { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50, quantity: 3, }, 
-        { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30, quantity: 1, },
-        { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50, quantity: 5,  }, 
-        { id: 2, img: product2, name: 'Relogio all Black', price: 250, promotion: 30, quantity: 2,  },
-        { id: 3, img: product3, name: 'Caixa de som Bluetooth ', price: 70.50, quantity: 3, }, 
-    ]);
+    const [orders, setOrders] = useState([]);
     const [payment, setPayment] = useState("pix");
     const [menuOpen, setMenu] = useState(false);
     const [stage, setStage] = useState(1);
+    
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
 
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
+    const [complement, setComplement] = useState('');
 
-    function toggleOverlay() {
-     setIsOverlayActive(!isOverlayActive);
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });
+
+    function fetchOrders() {
+      let nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
+
+      if (nowItems) {
+        setOrders(nowItems)
+      }
+    };
+
+    async function fetchUser() {
+      const Response = await api.get("/users")
+      
+      setName(Response.data.user.name)
+      setEmail(Response.data.user.email)
+
+      const ResponseInfo = await api.get("/usersinfo")
+      
+      if (ResponseInfo.data) {
+        setPhone(ResponseInfo.data.user_info.phone || '')
+        setAddress(ResponseInfo.data.user_info.address || '')
+        setComplement(ResponseInfo.data.user_info.complement || '')
+      }
     };
 
     function formatarComoDecimal(valor) {
@@ -46,6 +78,16 @@ export function Order(){
       });
   
       return formatador.format(valor);
+    };
+
+    const validateEmail = (email) => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    };
+
+    const validatePhone = (phone) => {
+      const phoneRegex = /^\(\d{2}\)\d{5}-\d{4}$/;
+      return phoneRegex.test(phone);
     };
 
     const calculateTotal = () => {
@@ -58,6 +100,90 @@ export function Order(){
       return total.toFixed(2);
     };
 
+    function handleDelete(index) {
+      let nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
+      
+      nowItems.splice(index, 1);
+    
+      localStorage.setItem('@Items', JSON.stringify(nowItems));
+      setOrderEffect(prevState => prevState + 1);
+      fetchOrders();
+    }
+
+    async function handleConfirm(){
+     try {
+      if (user) {
+        Response = await api.post("/orders/", { payment, total: calculateTotal(), items: orders})
+      }else {
+        Response = await api.post("/orders/createnon", { payment, total: calculateTotal(), items: orders})
+      }
+
+      const order_id = Response.data.id;
+
+      const phoneNumber = "5581999507813"
+      const message = `
+${user ? 'Usuário cadastrado' : 'Usuário não cadastrado'}
+Nome: ${name},
+Email: ${email},
+Telefone: ${phone},
+Endereço:
+ ${address},
+ ${complement}.
+
+Código do pedido: #${String(order_id).padStart(5, '0')},
+Total do pedido: R$${formatarComoDecimal(calculateTotal())},
+Itens do pedido:  ${orders.map(item => (
+ `
+
+ Nome do item: ${item.name},
+ Preço do item: R$${formatarComoDecimal(item.price)},
+ Em promoção: ${ item.promotion ? `-%${item.promotion}` : "Não"},
+ Variação: ${item.variation ? item.variation : 'Padrão'},
+ Quantidade de itens: ${item.quantity},
+ Total do item: R$${formatarComoDecimal(item.total)}.
+ `
+)).join('')}
+`
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`
+      Toast.fire({
+        icon: "success",
+        title: "Pedido feito"
+      }); 
+      localStorage.removeItem('@Items');
+
+      window.open(whatsappUrl, '_blank');
+      navigate("/")
+
+     } catch(error){
+      console.error(error)
+     }
+    };
+
+    async function passToThree(){
+     if (!name || !email || !phone || !address || !complement) return  Toast.fire({
+      icon: "warning",
+      title: "Preencha todos os campos!"
+    }); 
+     
+     if (!validatePhone(phone)) return Toast.fire({
+      icon: "warning",
+      title: "Digite um número de telefone válido"
+    }); 
+     
+     if (!validateEmail(email)) return Toast.fire({
+      icon: "warning",
+      title: "Digite um email válido"
+    }); 
+
+     setStage(3)
+    }
+
+    useEffect(()=> {
+      fetchOrders()
+      fetchUser()
+    }, [])
+
     function Open(){
       setSign(true)
     }
@@ -68,13 +194,14 @@ export function Order(){
     return(
      <S.Container>
       <Header 
+       orderEffect={orderEffect}
        conta={Open}
        openMenu={()=> setMenu(true)}
       />
 
       <Menu
        close={()=> setMenu(false)}
-       login={toggleOverlay}
+       login={Open}
        menuopen={menuOpen}
       />
 
@@ -114,39 +241,31 @@ export function Order(){
          </div>
 
          <ul>
-
-          { orders.length ? 
-           orders.map(item => (
-            <li key={item.id}>
-             <img src={item.img} alt="imagem do produto" />
-             <span>{item.quantity}X</span> 
-             <strong>{item.name}</strong>
-             <div className="price">
-              { item.promotion ? 
-               <>
-                <p className="cut">R${formatarComoDecimal(item.price)}</p> 
-                <p>R${formatarComoDecimal(item.price - (item.price * item.promotion) / 100)}</p>
-               </>
-              :
-               <p>R${formatarComoDecimal(item.price)}</p> 
-              }
-             
-             </div> 
-             <span className="total">{ item.promotion ?
-                    `R$ ${formatarComoDecimal(item.quantity * (item.price - (item.price * item.promotion) / 100))}`
-                   :
-                    `R$ ${formatarComoDecimal(item.quantity * item.price)}`
-                   }</span>
-             <FaRegTrashAlt/>
-            </li>
-           )) 
+          {orders.length ? 
+            orders.map((item, index) => (
+              <li key={item.id}>
+                <img src={item.img} alt="imagem do produto" />
+                <span>{item.quantity}X</span> 
+                <strong>{item.name} <span>{item.variation}</span></strong>
+                <div className="price">
+                  {item.promotion ? 
+                    <>
+                      <p className="cut">-{item.promotion}%</p> 
+                      <p>R${formatarComoDecimal(item.price)}</p>
+                    </>
+                    : <p>R${formatarComoDecimal(item.price)}</p>
+                  }
+                </div> 
+                <span className="total">R${formatarComoDecimal(item.total)}</span>
+                <FaRegTrashAlt onClick={() => handleDelete(index)} />
+              </li>
+            )) 
           : 
            <h3>Nenhum item adicionado ao carrinho ainda</h3>
           } 
-
          </ul>
 
-         <button onClick={()=> setStage(2)}>
+         <button onClick={()=> { if(!orders.length) return; setStage(2)}}>
           <p>Avançar</p>
          </button>
 
@@ -177,20 +296,33 @@ export function Order(){
             <h3>Identificação</h3>
             <div className="input-wrapper">
              <label htmlFor="name">Nome</label>
-             <input type="text" id="name" placeholder="Digite seu nome completo"/>
+             <input 
+              type="text" id="name" 
+              defaultValue={ name ? name : ''}
+              placeholder="Digite seu nome completo"
+              onChange={(e) => setName(e.target.value)}
+              />
             </div>
 
             <div className="input-wrapper">
              <label htmlFor="email">Email</label>
-             <input type="email" id="email" placeholder="Digite seu email"/>
+             <input 
+              type="email" 
+              id="email" 
+              defaultValue={ email ? email : ''}
+              placeholder="Digite seu email"
+              onChange={(e) => setEmail(e.target.value)}
+             />
             </div>
 
             <div className="input-wrapper">
              <label htmlFor="fone">Fone</label>
              <InputMask
               id="phone"
-              mask="(99) 99999-9999"
-              placeholder="(00) 00000-0000"
+              mask="(99)99999-9999"
+              defaultValue={ phone ? phone : ''}
+              placeholder="(00)00000-0000"
+              onChange={(e) => setPhone(e.target.value)}
              >
               {(inputProps) => <input {...inputProps} type="text" />}
              </InputMask>
@@ -201,12 +333,24 @@ export function Order(){
           <h3>Entrega</h3>
             <div className="input-wrapper">
              <label htmlFor="address">Endereço</label>
-             <input type="text" id="address" placeholder="Digite seu endereço"/>
+             <input 
+              type="text" 
+              id="address" 
+              defaultValue={ address ? address : ''}
+              placeholder="Digite seu endereço"
+              onChange={(e) => setAddress(e.target.value)}
+             />
             </div>
 
             <div className="input-wrapper">
              <label htmlFor="complement">Complemento</label>
-             <input type="text" id="complement" placeholder="Complemento/ponto de referencia"/>
+             <input 
+              type="text" 
+              id="complement" 
+              defaultValue={ complement ? complement : ''}
+              placeholder="Complemento/ponto de referencia"
+              onChange={(e) => setComplement(e.target.value)}
+             />
             </div>
 
           </form>
@@ -220,7 +364,7 @@ export function Order(){
           <p>Retornar</p>
           </button>
  
-          <button onClick={()=> setStage(3)}>
+          <button onClick={passToThree}>
           <p>Avançar</p>
           </button>
          </div>
@@ -326,7 +470,7 @@ export function Order(){
             <li key={item.id}>
              <img src={item.img} alt="imagem do produto" />
              <span>{item.quantity}X</span> 
-             <strong>{item.name}</strong>
+             <strong>{item.name} <span>{item.variation}</span></strong>
              <div className="price">
               { item.promotion ? 
                <>
@@ -342,7 +486,7 @@ export function Order(){
                    :
                     `R$ ${formatarComoDecimal(item.quantity * item.price)}`
                    }</span>
-             <FaRegTrashAlt/>
+           
             </li>
            )) 
           } 
@@ -354,24 +498,24 @@ export function Order(){
 
          <div className="info">
           <div className="identification">
-            <h3>Identificação <MdOutlineModeEdit /></h3>
+            <h3>Identificação <MdOutlineModeEdit onClick={()=> setStage(2)}/></h3>
 
-            <span>Matheus Augusto Gomes da Silva</span>
-            <span>galaxyplay41@gmail.com</span>
-            <span>81 99970-4376</span>
+            <span>{name}</span>
+            <span>{email}</span>
+            <span>{phone}</span>
 
           </div>
 
           <div className="address">
-            <h3>Endereço <MdOutlineModeEdit /></h3>
+            <h3>Endereço <MdOutlineModeEdit onClick={()=> setStage(2)}/></h3>
 
-            <span>Av. Inocéncio Lima, Rodoviaria, 04</span>
-            <span>Casa Branca de esquina</span>
+            <span>{address}</span>
+            <span>{complement}</span>
 
           </div>
 
           <div className="payment">
-            <h3>Forma de pagamento <MdOutlineModeEdit /></h3>
+            <h3>Forma de pagamento <MdOutlineModeEdit onClick={()=> setStage(3)}/></h3>
 
             <span>{payment}</span>
           </div>
@@ -387,7 +531,7 @@ export function Order(){
           <p>Retornar</p>
           </button>
  
-          <button>
+          <button onClick={handleConfirm}>
           <p>Confirmar pedido</p>
           </button>
          </div>

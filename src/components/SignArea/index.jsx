@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/auth";
 import { api } from "../../services/api";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import Swal from 'sweetalert2';
 
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff, FiUser } from "react-icons/fi";
 import Icon from "../../assets/Icon.svg";
@@ -18,6 +19,17 @@ export function Signarea({close, isactive= false}){
     const [password,setPassword] = useState('');
 
     const { signIn } = useAuth();
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -30,7 +42,10 @@ export function Signarea({close, isactive= false}){
 
     async function handleLogin() {
       if (!email.trim() || !password.trim()) {
-          return alert('Preencha todos os campos');
+          return Toast.fire({
+            icon: "warning",
+            title: 'Preencha todos os campos'
+          }); 
       }
   
       try {
@@ -40,27 +55,44 @@ export function Signarea({close, isactive= false}){
          
       } catch (error) {
           
-          if (error.response && error.response.status === 401) {
-              alert("E-mail e/ou senha incorreta");
+          if (error.response) {
+            Toast.fire({
+              icon: "error",
+              title: error.response.data.message
+            });  
           } else {
-              alert('Não foi possível fazer login');
+            Toast.fire({
+              icon: "error",
+              title: 'Não foi possível fazer login'
+            }); 
           }
       } finally {
           setLoading(false);
       }
-    }
+    };
 
     async function handleCreate(){
      if (!name.trim() && !email.trim() && !password.trim()){
-        return alert('Preencha todos os campos')
+      
+        return Toast.fire({
+          icon: "warning",
+          title: 'Preencha todos os campos'
+        }); 
      };
 
      if (!validateEmail(email)){
-        return alert('Digite um email válido')
+      return Toast.fire({
+        icon: "warning",
+        title: 'Digite um email válido'
+      }); 
+         
      };
 
      if (password.trim().length < 6) {
-        return alert("Senha deve ter no mínimo 6 caracteres")
+        return  Toast.fire({
+          icon: "warning",
+          title: "Senha deve ter no mínimo 6 caracteres"
+        });  
      }
 
      setLoading(true) 
@@ -68,16 +100,25 @@ export function Signarea({close, isactive= false}){
      await api.post("/users", {name, email, password})
         
      .then(()=> {
-            alert("Usuário cadastrado com sucesso!")
+            Toast.fire({
+              icon: "success",
+              title: "Usuário cadastrado com sucesso!"
+            });  
             setLoading(false)
-            close()
-            signIn({ email, password})
+            
+            signIn({ email, password, close})
           })
      .catch(error => {
        if(error.response){
-         alert(error.response.data.message);
+        Toast.fire({
+          icon: "error",
+          title: error.response.data.message
+        });  
        }else {
-         alert("Não foi possivel cadastrar o usuário.")
+         Toast.fire({
+           icon: "error",
+           title: "Não foi possivel cadastrar o usuário."
+         });  
        }
        setLoading(false)
      })

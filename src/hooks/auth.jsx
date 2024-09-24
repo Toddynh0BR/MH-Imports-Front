@@ -1,14 +1,29 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { api } from "../services/api"; 
+import Swal from 'sweetalert2';
 
 export const AuthContext = createContext({});
 
 function AuthProvider({ children }) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.onmouseenter = Swal.stopTimer;
+          toast.onmouseleave = Swal.resumeTimer;
+        }
+      });
     const [data, setData] = useState({});
 
     async function signIn({ email, password, close }) {
         if (!email || !password) {
-            return alert("Informe o email/senha.");
+            return  Toast.fire({
+                icon: "warning",
+                title: "Informe o email/senha."
+              });
         }
 
         try {
@@ -21,16 +36,22 @@ function AuthProvider({ children }) {
 
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setData({ user, token });
-            close()
+            close();
 
         } catch (error) {
             if (error.response) {
-                alert(error.response.data.message);
+                Toast.fire({
+                    icon: "warning",
+                    title: error.response.data.message
+                });
             } else {
-                alert("Não foi possível entrar.");
+                Toast.fire({
+                    icon: "warning",
+                    title: "Não foi possível entrar."
+                });
             }
         }
-    }
+    };
 
     function Logout() {
         localStorage.removeItem("@mhimports:token");
@@ -38,7 +59,31 @@ function AuthProvider({ children }) {
         localStorage.removeItem("@mhimports:refreshToken");
 
         setData({});
-    }
+    };
+
+    async function refreshToken() {
+        const storedRefreshToken = localStorage.getItem("@mhimports:refreshToken");
+        if (!storedRefreshToken) {
+            Logout();
+            return;
+        }
+
+        try {
+            const response = await api.post("/sessions/refresh-token", { refreshToken: storedRefreshToken });
+            const { token, refreshToken: newRefreshToken } = response.data;
+
+            localStorage.setItem("@mhimports:token", token);
+            localStorage.setItem("@mhimports:refreshToken", newRefreshToken);
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+            setData(prevState => ({
+                ...prevState,
+                token
+            }));
+        } catch (error) {
+            Logout();  
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem("@mhimports:token");
@@ -57,30 +102,20 @@ function AuthProvider({ children }) {
             response => response, 
             async error => {
                 const originalRequest = error.config;
-        
 
                 if (error.response && error.response.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true;  
-        
-                    const refreshToken = localStorage.getItem("@mhimports:refreshToken");
-                    if (refreshToken) {
-                        try {
-                            await refreshToken();  
-                            
-              
-                            originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem("@mhimports:token")}`;
-                            return api(originalRequest); // Refaz a requisição original
-                        } catch (error) {
-                            Logout(); // Se o refresh falhar, faz logout
-                        }
-                    }
+                    
+                    await refreshToken();  
+                    originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem("@mhimports:token")}`;
+                    return api(originalRequest); 
                 }
-        
-                return Promise.reject(error); // Se não for 401, ou falhar, rejeita o erro
+
+                return Promise.reject(error); 
             }
         );
 
-        // Remove o interceptor ao desmontar o componente
+        
         return () => {
             api.interceptors.response.eject(interceptor);
         };

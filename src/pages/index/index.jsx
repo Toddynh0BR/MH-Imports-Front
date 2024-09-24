@@ -2,34 +2,39 @@ import * as S from "./style";
 
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from "react";
+import { api } from "../../services/api";
 import { Link } from "react-router-dom";
 
 import { Signarea } from "../../components/SignArea";
 import { Header } from "../../components/header";
 import { Footer } from "../../components/footer";
+import { Menu } from "../../components/Menu";
 import { Card } from "../../components/Card";
-
 
 import WHATSAPP from "../../assets/whatsapp.svg";
 
 export function Search() {
   const [signArea, setSign] = useState(false);
-  const [isOverlayActive, setIsOverlayActive] = useState(false);
-  const [results, setResults] = useState([]);
-  const { index } = useParams();
+  const [orderEffect, setEffect] = useState(1);
   const [menuOpen, setMenu] = useState(false);
+  const [results, setResults] = useState([
+    
+   ]);
+  const { index } = useParams();
 
-  function toggleOverlay() {
-    setIsOverlayActive(!isOverlayActive);
+  async function fetchResults(){
+    Response = await api.post("/items/index", { index })
+
+    if (Response.data) {
+      const filteredResponse = Response.data.filter(item => item.status !== 0)
+      setResults(filteredResponse)
+    }
   };
 
-  useEffect(() => {
-    if (isOverlayActive) {
-      document.body.style.overflow = 'hidden'; 
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-  }, [isOverlayActive]);
+
+  useEffect(()=> {
+    fetchResults()
+  },[index])
 
     
   function Open(){
@@ -43,13 +48,14 @@ export function Search() {
   return (
     <S.Container >
       <Header 
+       orderEffect={orderEffect}
        conta={Open}
        openMenu={() => setMenu(true)}
       />
 
       <Menu
        close={()=> setMenu(false)}
-       login={toggleOverlay}
+       login={Open}
        menuopen={menuOpen}
       />
 
@@ -61,7 +67,7 @@ export function Search() {
 
       <S.Main>
 
-        <Link to={-1}>
+        <Link to='/'>
          <p className="return">
           Voltar
          </p>
@@ -74,7 +80,18 @@ export function Search() {
 
            { results.length ?
             <div className="products">
-
+             { results.map(item => (
+              <Card
+               key={item.id}
+               id={item.id}
+               img={`${api.defaults.baseURL}/files/${item.img1}`}
+               high={item.high}
+               name={item.name}
+               price={item.price}
+               promotion={item.promotion}
+               effect={()=> setEffect(prevState => [prevState + 1])}
+              />
+             ))}
             </div> 
            : 
             <h2>Nenhum resultado encontrado</h2>

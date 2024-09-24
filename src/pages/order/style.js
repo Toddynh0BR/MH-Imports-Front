@@ -163,7 +163,14 @@ ul {
  color: #1e3483;
 
  width: 20rem;
+ flex-direction: column;
  display: flex;
+ gap: .5rem;
+
+ span {
+  font-size: 1.3rem;
+  font-weight: 400;
+ }
  }
 
  .price {
@@ -179,7 +186,6 @@ ul {
  }
  
  .cut {
- text-decoration: line-through;
  font-size: 1.4rem;
  opacity: .7;
  }
@@ -283,6 +289,11 @@ li {
  }
 }
 }
+}
+
+h3 {
+ font-size: 1.8rem;
+ color: #001358;
 }
 `
 
@@ -809,6 +820,14 @@ main {
  strong {
  width: 10rem;
  overflow: hidden;
+
+ flex-direction: column;
+ display: flex;
+
+ span {
+  font-size: 1rem;
+  font-weight: 400;
+ }
  }
 
  .price {

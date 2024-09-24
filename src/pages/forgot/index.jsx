@@ -4,6 +4,7 @@ import { MdOutlineMailLock } from "react-icons/md";
 import { api } from "../../services/api";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import Swal from 'sweetalert2';
 
 import { Signarea } from "../../components/SignArea";
 import { Header } from "../../components/header";
@@ -11,42 +12,58 @@ import { Footer } from "../../components/footer";
 import { Menu } from "../../components/Menu";
 
 export function Forgot(){
-  const [signArea, setSign] = useState(false);
-  const [isOverlayActive, setIsOverlayActive] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [stage, setStage] = useState(1);
+  const [signArea, setSign] = useState(false);
   const [menuOpen, setMenu] = useState(false);
+  const [stage, setStage] = useState(1);
+
+  const [email, setEmail] = useState('');
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  });
 
   async function handleSend(){
    if (!email.trim()) return alert('Digite seu email para prosseguir');
    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-   if (!emailRegex.test(email)) return alert('Digite um email válido.')
+   if (!emailRegex.test(email)) return Toast.fire({
+    icon: "warning",
+    title: 'Digite um email válido'
+  }); 
 
     try {
       setLoading(true)
       await api.post("/usersinfo/forgot", { email });
       setStage(2); 
+
     } catch (error) {
       setStage(1); 
       if (error.response) {
-        alert(error.response.data.message);
+        Toast.fire({
+          icon: "error",
+          title: error.response.data.message
+        }); 
       } else {
-        alert("Erro ao redefinir senha");
+        Toast.fire({
+          icon: "error",
+          title: "Erro ao redefinir senha"
+        }); 
       }
     } finally {
       setLoading(false)
     }
   }
 
-
-  function toggleOverlay() {
-    setIsOverlayActive(!isOverlayActive);
-   };
-
-
-   function Open(){
+  function Open(){
     setSign(true)
   }
   function Close(){
@@ -62,7 +79,7 @@ export function Forgot(){
 
       <Menu
        close={()=> setMenu(false)}
-       login={toggleOverlay}
+       login={Open}
        menuopen={menuOpen}
       />
 

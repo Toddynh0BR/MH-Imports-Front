@@ -337,8 +337,15 @@ img {
    color: #001358;
 
    overflow: hidden;
+   align-items: center;
    display: flex;
+   gap: 1rem;
    width: 20rem;
+
+   span {
+    font-size: 1rem;
+    font-weight: 400;
+   }
   }
 
   p {

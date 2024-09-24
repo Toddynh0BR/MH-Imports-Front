@@ -2,8 +2,8 @@ import * as S from "./style";
 
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/auth";
 import { api } from "../../services/api";
+import Swal from "sweetalert2";
 
 import defaultUser from "../../assets/default.svg";
 import HeaderLogo from "../../assets/Header.svg";
@@ -42,75 +42,31 @@ export function User(){
     const [oldPassword, setOldPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-
-    const [Orders, setOrders] = useState([
-      {
-          id: 1,
-          status: 'Finalizado',
-          total: '950.4',
-          updated_at: '2024-08-26 16:34:15',
-          canceled: 'none',
-          order_itens: [
-              { id: 1, name: 'fone de ouvido', quantity: 2 },
-              { id: 2, name: 'carregador', quantity: 10 },
-              { id: 3, name: 'capinha', quantity: 5 },
-              { id: 4, name: 'celular', quantity: 2 },
-              { id: 5, name: 'copo stanley', quantity: 15 }
-          ]
-      },
-      {
-          id: 2,
-          status: 'Cancelado',
-          total: '310.3',
-          updated_at: '2024-08-26 16:34:15',
-          canceled: 'user',
-          order_itens: [
-            { id: 1, name: 'fone de ouvido', quantity: 2 },
-            { id: 2, name: 'carregador', quantity: 10 },
-            { id: 3, name: 'capinha', quantity: 5 },
-            { id: 4, name: 'celular', quantity: 2 },
-            { id: 5, name: 'copo stanley', quantity: 15 }
-        ]
-      },
-      {
-          id: 3,
-          status: 'Pronto',
-          total: '10.4',
-          updated_at: '2024-08-26 16:34:15',
-          canceled: 'none',
-          order_itens: [
-            { id: 1, name: 'fone de ouvido', quantity: 2 },
-            { id: 2, name: 'carregador', quantity: 10 },
-            { id: 3, name: 'capinha', quantity: 5 },
-            { id: 4, name: 'celular', quantity: 2 },
-            { id: 5, name: 'copo stanley', quantity: 15 }
-        ]
-      },
-      {
-          id: 4,
-          status: 'Pendente',
-          total: '950.4',
-          updated_at: '2024-08-26 16:34:15',
-          canceled: 'none',
-          order_itens: [
-            { id: 1, name: 'fone de ouvido', quantity: 2 },
-            { id: 2, name: 'carregador', quantity: 10 },
-            { id: 3, name: 'capinha', quantity: 5 },
-            { id: 4, name: 'celular', quantity: 2 },
-            { id: 5, name: 'copo stanley', quantity: 15 }
-        ]
-      }
+    const [Orders, setOrders] = useState([  
     ]);
     const [orders, setFilter] = useState(Orders)
 
+    const Toast = Swal.mixin({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+      }
+    });
+
 
     useEffect(()=> {
+     if (!Orders.length) return
      if (status == 'tudo') setFilter(Orders);
-     if (status == 'pendente') setFilter( Orders.filter(Orders => Orders.status == 'Pendente'))
-     if (status == 'preparando') setFilter( Orders.filter(Orders => Orders.status == 'Preparando'))
-     if (status == 'pronto') setFilter( Orders.filter(Orders => Orders.status == 'Pronto'))
-     if (status == 'finalizado') setFilter( Orders.filter(Orders => Orders.status == 'Finalizado'))
-     if (status == 'cancelado') setFilter( Orders.filter(Orders => Orders.status == 'Cancelado'))
+     if (status == 'pendente') setFilter( Orders.filter(Orders => Orders.info.status == 'pendente'))
+     if (status == 'preparando') setFilter( Orders.filter(Orders => Orders.info.status == 'preparando'))
+     if (status == 'pronto') setFilter( Orders.filter(Orders => Orders.info.status == 'pronto'))
+     if (status == 'finalizado') setFilter( Orders.filter(Orders => Orders.info.status == 'finalizado'))
+     if (status == 'cancelado') setFilter( Orders.filter(Orders => Orders.info.status == 'cancelado'))
 
     }, [status])//filtrar os items do historico
 
@@ -196,19 +152,32 @@ export function User(){
 
       if (!Response.data) return setOrders([]);
       setOrders(Response.data)
-    }
+      setFilter(Response.data)
+    };//pegar orders do usuario
 
     async function handleUpdate(){
-      if (!name.trim())  return alert('Nome não pode ficar vazio');
-      if (!email.trim()) return alert('Email não pode ficar vazio');
+      if (!name.trim())  return Toast.fire({
+        icon: "warning",
+        title: 'Nome não pode ficar vazio'
+      }); 
+      if (!email.trim()) return Toast.fire({
+        icon: "warning",
+        title: 'Email não pode ficar vazio'
+      }); 
 
       if (phone || address || complement){
-        if (!validatePhone(phone)) return alert('Digite um numero de telefone válido');
+        if (!validatePhone(phone)) return Toast.fire({
+          icon: "warning",
+          title: 'Digite um numero de telefone válido'
+        });  
 
         await api.post("/usersinfo", { phone, address, complement})
       };
 
-      if (!validateEmail(email)) return alert('Digite um email válido');
+      if (!validateEmail(email)) return  Toast.fire({
+        icon: "warning",
+        title: 'Digite um email válido'
+      });  
       
       await api.put("/users", { name, email })
 
@@ -220,26 +189,47 @@ export function User(){
         
       }
 
-      alert("Dados atualizados com sucesso");
+      Toast.fire({
+        icon: "success",
+        title: "Dados atualizados com sucesso"
+      });  
       setSave(false);
       fetchUser();
     };//atualizar informaçoes do usuario
 
     async function handleUpdatePass(){
-     if (!password || !oldPassword || !confirmPassword) return alert('Preencha todos os campos');
+     if (!password || !oldPassword || !confirmPassword) return Toast.fire({
+      icon: "warning",
+      title: 'Preencha todos os campos'
+    }); 
 
-     if (password != confirmPassword) return alert('Senha de confirmação não condiz com nova senha');
+     if (password != confirmPassword) return Toast.fire({
+      icon: "warning",
+      title: 'Senha de confirmação não condiz com nova senha'
+    }); 
 
-     if (password.length < 6) return alert('Senha deve ter no mínimo 6 caracteres');
+     if (password.length < 6) return Toast.fire({
+      icon: "warning",
+      title: 'Senha deve ter no mínimo 6 caracteres'
+    }); 
      try {
       await api.put("/users", { email, password, old_password: oldPassword });
 
-      alert("Senha alterada com sucesso")
+      Toast.fire({
+        icon: "success",
+        title: "Senha alterada com sucesso"
+      }); 
      } catch (error) {
       if (error.response) {
-        alert(error.response.data.message);
+        Toast.fire({
+          icon: "error",
+          title: error.response.data.message
+        }); 
       } else {
-        alert('Erro ao alterar senha')
+        Toast.fire({
+          icon: "error",
+          title: 'Erro ao alterar senha'
+        }); 
       }
      }
    
@@ -423,28 +413,28 @@ export function User(){
               <div className="orderHeader">
                 <img src={MHblack} alt="MH imports" />
   
-                <span>{order.status}</span>
+                <span>{order.info.status}</span>
               </div>
   
               <div className="orderContent">
                 <div className="orderCode">
-                 <span>#{String(order.id).padStart(5, '0')}</span>
+                 <span>#{String(order.info.id).padStart(5, '0')}</span>
 
-                  { order.status == 'Cancelado' ? <p>{ order.canceled == 'user' ? 'cancelado por você' : 'cancelado'}</p> : null} 
+                  { order.info.status == 'Cancelado' ? <p>{ order.info.canceled == 'user' ? 'cancelado por você' : 'cancelado'}</p> : null} 
                 </div>
   
                 <div className="orderItens">
                  <p>
-                 {order.order_itens
+                 {order.items
                  .map((item) => `${item.quantity} x ${item.name}`)
                  .join(', ')}
                  </p>
                 </div>
 
                 <div className="orderTotal">
-                 <strong>{formatDate(order.updated_at).formattedDate}</strong>
-                 <p>{formatDate(order.updated_at).formattedTime}</p>
-                 <span>{formatCurrency(Number(order.total))}</span>
+                 <strong>{formatDate(order.info.updated_at).formattedDate}</strong>
+                 <p>{formatDate(order.info.updated_at).formattedTime}</p>
+                 <span>{formatCurrency(Number(order.info.total))}</span>
                 </div>
               </div>
   
@@ -505,4 +495,4 @@ export function User(){
       </main>
      </S.Container>
     )
-}
+}/**/

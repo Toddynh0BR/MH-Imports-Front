@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Redefine } from '../pages/redefine';
 import { Product } from '../pages/product';
 import { Forgot } from '../pages/forgot';
+import { ERROR404 } from '../pages/404';
 import { Search } from '../pages/index';
 import { Order } from '../pages/order';
 import { Home } from '../pages/home';
@@ -20,6 +21,7 @@ export function AppRoutes() {
       <Route path='/search/:index' element={<Search />}/>
       <Route path='/reset-password/:token' element={<Redefine />}/>
       { asLogin ? <Route path='/user/:local' element={<User />}/> : null}
+      <Route path='*' element={<ERROR404 />}/>
     </Routes>
   )
 }
