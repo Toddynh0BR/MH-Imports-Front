@@ -119,7 +119,12 @@ export function Product() {
 
   function formatarComoDecimal(valor) {
     return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(valor);
-  }
+  };
+
+  function calcularDesconto(promotion, price) {
+    const desconto = (promotion / 100) * price;
+    return price - desconto;
+  };
 
   function handleAddOrder() {
     if (variation.length && !selectedVar) return Toast.fire({
@@ -158,7 +163,7 @@ export function Product() {
     });
 
     localStorage.setItem('@Items', JSON.stringify(nowItems));
-  }
+  };
 
   if (!name) {
     return <LoadingPage/>;
@@ -257,7 +262,9 @@ export function Product() {
             <div className="info">
               <h2>{name}</h2>
               <div className="price">
-                <p>R$ {formatarComoDecimal(finalPrice)}</p>
+              
+                <p className={promotion ? 'cut': ''}>R$ {formatarComoDecimal(price)}</p>
+                {promotion && <p className="finalPrice">R$ {formatarComoDecimal(finalPrice)}</p>}
                 {promotion && <p className="promotion">-{promotion}%</p>}
               </div>
 

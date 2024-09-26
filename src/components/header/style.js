@@ -369,15 +369,24 @@ img {
  }
 }
 
-.menu {
+.menu, .cart {
  display: none;
 }
 
 @media (max-width: 450px){
- justify-content: space-between;
+ padding: 1rem 2rem;
+ height: 13rem;
 
+ grid-template-rows: repeat(2, 1fr);
+ grid-template-areas:     
+   "menu logo cart"
+   "input input input";
+ display: grid;
+ row-gap: 0rem;
+ 
  .inputArea {
-  display: none;
+  grid-area: input;
+  width: 100%;
  }
  .Utils{
   display: none;
@@ -385,6 +394,7 @@ img {
 
  img {
  width: 20rem;
+ grid-area: logo;
  }
 
  .menu {
@@ -393,6 +403,15 @@ img {
  font-size: 3rem;
  cursor: pointer;
  color: #f0f7fb;
+ grid-area: menu;
+ }
+ .cart {
+ display: flex;
+ 
+ font-size: 3rem;
+ cursor: pointer;
+ color: #f0f7fb;
+ grid-area: cart;
  }
 }
 `

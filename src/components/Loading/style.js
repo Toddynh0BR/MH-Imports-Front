@@ -19,6 +19,30 @@ h2 {
  animation: loadings .7s  infinite;
 }
 
+span {
+ height: 4rem;
+ width: 4rem;
+
+ display: flex;
+
+ border: 3px solid #d8f0fd;
+ border-right-color: #40a9ff;
+ border-radius: 50%;
+
+
+ animation: loading .9s linear infinite;
+}
+
+@keyframes loading {
+    0% {
+     transform: rotate(0deg);
+    }
+
+    100% {
+     transform: rotate(360deg);
+    }
+}
+
 @keyframes loadings {
  0% {
   width: 12rem

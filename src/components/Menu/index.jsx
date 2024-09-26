@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/auth";
 import { api } from "../../services/api";
 
-import { FiX, FiSearch } from "react-icons/fi";
+import { FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import Logo from "../../assets/Header.svg";
 
 import { Input } from "../Input";
@@ -15,11 +15,11 @@ export function Menu({menuopen= false, close, login}){
     const navigate = useNavigate();
 
     const [typingTimeout, setTypingTimeout] = useState(null);
+    const [categories, setCategories] = useState([]);
+    const [categoryOpen, setOpen] = useState(false);
     const [asLogin, setAsLogin] = useState(false);
+    const [results, setResults] = useState([]);
     const [index, setIndex] = useState('');
-
-    const [results, setResults] = useState([
-    ]);
 
    function handleLogin(){
      close()
@@ -75,12 +75,21 @@ export function Menu({menuopen= false, close, login}){
     navigate(`/search/${index}`)
    };
 
+   async function fetchCategory(){
+    const Response = await api.get("/category/")
+
+    console.log(Response.data)
+
+    setCategories(Response.data)
+  };
+
    useEffect(()=> {
     setAsLogin( user ? true : false )
+    fetchCategory()
    },[user]);
 
     return(
-     <S.Container data-menuopen={menuopen}>
+     <S.Container data-menuopen={menuopen} data-category={categoryOpen}>
       <header>
        <img src={Logo} alt="MH Imports" />
        <FiX onClick={close}/>
@@ -126,7 +135,29 @@ export function Menu({menuopen= false, close, login}){
         :
          <li>Sair</li> 
         }
+
+        { categories.length ?
+         <div className="CategoryArea" onClick={()=> setOpen(prevState => !prevState)}>
+          <div className="header">
+           <span>Categorias</span>
+           <FiChevronDown/>
+          </div>
+        
+          <ul>
+           { categories.map(item => (
+            <Link to={`/category/${item.name}`} key={item.id}>
+             <li>{item.name}</li>
+            </Link>
+           ))}
+          </ul>
+        
+         </div>
+        :
+         null
+        }
        </ul>
+
+
       </main>
      </S.Container>
     )

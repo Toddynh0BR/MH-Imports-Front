@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 export const Container = styled.div`
 width: 100%;
+background-color: #f0f7fb;
 
 
 .UP {
@@ -65,9 +66,7 @@ position: relative;
 
 margin-top: 12rem;
 
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-border-bottom: 1px solid #dad6d6c2;
-background-color: #f0f7fb;
+
 
 .ads {
  width: 120rem;
@@ -142,7 +141,7 @@ export const Offer = styled.div`
 height: 37rem;
 width: 100%;
 
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
 background-color: #f0f7fb;
 border-radius: .4rem;
 padding: 1.5rem;
@@ -205,7 +204,6 @@ export const High = styled.div`
 height: 37rem;
 width: 100%;
 
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 background-color: #f0f7fb;
 border-radius: .4rem;
 padding: 1.5rem;
@@ -289,6 +287,7 @@ z-index: 10;
  display: flex;
  align-items: center;
  justify-content: center;
+ text-align: center;
  span {
  font-size: 2rem;
  text-transform: uppercase;
@@ -460,13 +459,13 @@ z-index: 10;
  width: 100%;
  opacity: 1;
  font-size: 1.4rem;
- padding-left: 1rem;
+ padding: .5rem 1.5rem;
  }
  }
  };
 
  .HoverCategory {
- padding: .5rem 0;
+ padding: 1rem 0;
  &:hover .Categories{
  width: 20rem;
   
@@ -475,7 +474,8 @@ z-index: 10;
  
  span {
  width: 100%;
- height: 2rem;
+ height: 2.5rem;
+ padding: .5rem 1.5rem;
  font-size: 1.4rem;
  display: flex;
  }
@@ -488,7 +488,6 @@ z-index: 10;
 export const Products = styled.div`
 width: 100%;
 
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 background-color: #f0f7fb;
 border-radius: .4rem;
 padding: 1.5rem;

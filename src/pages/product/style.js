@@ -87,6 +87,11 @@ padding: 4rem;
   padding-bottom: .3rem;
 
  }
+
+ .cut {
+ text-decoration: line-through;
+ opacity: .7;
+ }
 }
 
 .info {
@@ -360,6 +365,7 @@ padding: 4rem;
 
 .info {
  border-left: 0px solid transparent;
+ padding: 0;
 }
 .others {
  display: none;

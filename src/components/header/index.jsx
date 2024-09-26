@@ -123,6 +123,8 @@ export function Header({conta, openMenu, orderEffect}){
 
     return(
      <S.Container>
+      <IoMenu className="menu" onClick={openMenu}/>
+
       <Link to="/">
        <img src={Logo} alt="MH Imports" />
       </Link>
@@ -209,8 +211,10 @@ export function Header({conta, openMenu, orderEffect}){
        </div>
       </div>
 
-      <IoMenu className="menu" onClick={openMenu}/>
       
+      <Link to="/order" className="cart">
+         <FiShoppingCart />
+        </Link>
      </S.Container>
     )
 };

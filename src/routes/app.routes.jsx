@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 
+import { SearchCategory } from '../pages/category';
 import { Redefine } from '../pages/redefine';
 import { Product } from '../pages/product';
 import { Forgot } from '../pages/forgot';
@@ -19,6 +20,7 @@ export function AppRoutes() {
       <Route path='/forgot' element={<Forgot />}/>
       <Route path='/preview/:id' element={<Product />}/>
       <Route path='/search/:index' element={<Search />}/>
+      <Route path='/category/:index' element={<SearchCategory />}/>
       <Route path='/reset-password/:token' element={<Redefine />}/>
       { asLogin ? <Route path='/user/:local' element={<User />}/> : null}
       <Route path='*' element={<ERROR404 />}/>
