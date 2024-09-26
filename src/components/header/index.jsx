@@ -89,7 +89,7 @@ export function Header({conta, openMenu, orderEffect}){
    function handleEnterPress(event) {
 
 
-    if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'ArrowRight' ) {
+    if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'ArrowRight' || event.keyCode === 13) {
      if (!index.trim()) return;
 
      setIndex('')

@@ -127,6 +127,8 @@ height: 100%;
 width: 100%;
 
 flex-direction: column;
+align-items: center;
+justify-content: center;
 display: flex;
 gap: 2rem;
 
@@ -197,6 +199,7 @@ svg {
 
 @media (max-width: 450px){
  height: 33rem;
+ padding: .5rem;
 }
 `
 
@@ -255,6 +258,7 @@ padding: 1.5rem;
 
 @media (max-width: 450px){
   height: 33rem;
+  padding: .5rem;
 }
 `
 
@@ -490,7 +494,7 @@ width: 100%;
 
 background-color: #f0f7fb;
 border-radius: .4rem;
-padding: 1.5rem;
+padding: .5rem;
 
 .title {
  height: fit-content;
@@ -524,9 +528,11 @@ padding: 1.5rem;
 
 @media (max-width: 450px){
  .products {
- grid-template-columns: repeat(2, 50%);
+ grid-template-columns: repeat(2, 1fr);
  grid-auto-rows: 24rem;
- gap: .8rem;
+ gap: .5rem;
+
+ width: 100%;
  }
 }
 `

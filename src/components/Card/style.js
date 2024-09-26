@@ -4,6 +4,8 @@ export const Container = styled.div`
 width: 22rem;
 height: 100%;
 
+
+
 flex-direction: column;
 align-items: center;
 position: relative;
@@ -14,6 +16,8 @@ box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 border:  1px solid #dad6d6c2;
 transition: .3s ease-in-out;
 border-radius: .4rem;
+
+
 
 .descount {
  position: absolute;
@@ -214,7 +218,8 @@ p {
  }
 };
 
+margin: 0;
 @media (max-width: 450px){
- width: 16rem;
+ width: 100%;
 }
 `
