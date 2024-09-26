@@ -177,7 +177,8 @@ Itens do pedido:  ${orders.map(item => (
     }); 
 
      setStage(3)
-    }
+     window.scrollTo(0, 100)
+    };
 
     useEffect(()=> {
       fetchOrders()
@@ -265,7 +266,7 @@ Itens do pedido:  ${orders.map(item => (
           } 
          </ul>
 
-         <button onClick={()=> { if(!orders.length) return; setStage(2)}}>
+         <button onClick={()=> { if(!orders.length) return; setStage(2); window.scrollTo(0, 100);}}>
           <p>Avançar</p>
          </button>
 
@@ -360,7 +361,7 @@ Itens do pedido:  ${orders.map(item => (
 
 
          <div className="buttons">
-          <button onClick={()=> setStage(1)}>
+          <button onClick={()=> {setStage(1); window.scrollTo(0, 100)}}>
           <p>Retornar</p>
           </button>
  
@@ -431,11 +432,11 @@ Itens do pedido:  ${orders.map(item => (
          </main>
 
          <div className="buttons">
-          <button onClick={()=> setStage(2)}>
+          <button onClick={()=> {setStage(2); window.scrollTo(0, 100)}}>
           <p>Retornar</p>
           </button>
  
-          <button onClick={()=> setStage(4)}>
+          <button onClick={()=> {setStage(4); window.scrollTo(0, 100)}}>
           <p>Avançar</p>
           </button>
          </div>
@@ -498,7 +499,7 @@ Itens do pedido:  ${orders.map(item => (
 
          <div className="info">
           <div className="identification">
-            <h3>Identificação <MdOutlineModeEdit onClick={()=> setStage(2)}/></h3>
+            <h3>Identificação <MdOutlineModeEdit onClick={()=> {setStage(2); window.scrollTo(0, 100)}}/></h3>
 
             <span>{name}</span>
             <span>{email}</span>
@@ -507,7 +508,7 @@ Itens do pedido:  ${orders.map(item => (
           </div>
 
           <div className="address">
-            <h3>Endereço <MdOutlineModeEdit onClick={()=> setStage(2)}/></h3>
+            <h3>Endereço <MdOutlineModeEdit onClick={()=> {setStage(2); window.scrollTo(0, 100)}}/></h3>
 
             <span>{address}</span>
             <span>{complement}</span>
@@ -515,7 +516,7 @@ Itens do pedido:  ${orders.map(item => (
           </div>
 
           <div className="payment">
-            <h3>Forma de pagamento <MdOutlineModeEdit onClick={()=> setStage(3)}/></h3>
+            <h3>Forma de pagamento <MdOutlineModeEdit onClick={()=> {setStage(3); window.scrollTo(0, 100)}}/></h3>
 
             <span>{payment}</span>
           </div>
@@ -527,7 +528,7 @@ Itens do pedido:  ${orders.map(item => (
          </main>
 
          <div className="buttons">
-          <button onClick={()=> setStage(3)}>
+          <button onClick={()=> {setStage(3); window.scrollTo(0, 100)}}>
           <p>Retornar</p>
           </button>
  

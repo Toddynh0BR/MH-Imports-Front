@@ -262,7 +262,7 @@ export const Categories = styled.div`
 width: 100%;
 height: 7rem;
 
-padding: 0 2.9rem;
+
 
 transition: .3s ease-in-out;
 position: fixed;

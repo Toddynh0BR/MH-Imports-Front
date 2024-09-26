@@ -10,7 +10,7 @@ export const Main = styled.main`
 
  padding: 4rem;
 
- margin-top: 12rem;
+ margin-top: 13rem;
 
  .return {
   font-size: 1.8rem;
@@ -979,8 +979,12 @@ main {
  gap: 2rem;
 
  .orders {
-   flex: none;
-  height: 50rem;
+  height: fit-content;
+  flex: none;
+
+  ul {
+    max-height: 40rem;
+  }
  }
 
 }

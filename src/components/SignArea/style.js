@@ -284,6 +284,7 @@ box-shadow: 0px 0px 37px -4px rgba(64,169,255,1);
 
  }
  main {
+  padding: 2rem 3rem;
   height: 100vh;
   width: 100%;
   opacity: 1;

@@ -101,6 +101,7 @@ padding: 5rem;
 }
 
 @media (max-width: 450px){
+ padding: 2rem;
 .box {
  height: 20rem;
  width: 100%;

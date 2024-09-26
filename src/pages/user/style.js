@@ -459,6 +459,10 @@ main {
   height: 100vh;
   width: 80%;
   transform: translateX(-100%);
+
+  a {
+   bottom: 6rem;
+  }
  }
 
  main {
