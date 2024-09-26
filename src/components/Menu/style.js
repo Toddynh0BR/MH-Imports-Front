@@ -132,7 +132,7 @@ main {
 
   border-radius: 0 0 .4rem .4rem;
   background-color: none;
-  overflow-y: scroll;
+  overflow-y: auto;
 
 
   li {

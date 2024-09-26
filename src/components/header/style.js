@@ -382,6 +382,8 @@ img {
    "menu logo cart"
    "input input input";
  display: grid;
+ justify-content: center;
+ align-items: center;
  row-gap: 0rem;
  
  .inputArea {
