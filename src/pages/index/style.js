@@ -14,8 +14,6 @@ width: 100%;
 }
 `
 
-
-
 export const Main = styled.main`
 min-height: 100vh;
 width: 100%;
@@ -36,7 +34,7 @@ padding: 4rem 3rem;
 }
 
 @media (max-width: 450px){
- padding: 4rem 2rem;
+ padding: 4rem 1rem;
 }
 `
 
@@ -47,7 +45,7 @@ width: 100%;
 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 background-color: #f0f7fb;
 border-radius: .4rem;
-padding: 1.5rem;
+padding: .5rem;
 
 .title {
  height: fit-content;
@@ -91,11 +89,11 @@ h2 {
  padding: .5rem;
 
  .products {
-  width: fit-content;
-  grid-template-columns: repeat(2, 50%);
+  grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: 24rem;
-  gap: .8rem;
+  gap: .5rem;
 
+  width: 100%;
   a {
    margin: 0;
    padding: 0;

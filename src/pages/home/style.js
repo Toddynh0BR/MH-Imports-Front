@@ -528,7 +528,7 @@ padding: .5rem;
 
 @media (max-width: 450px){
  .products {
- grid-template-columns: repeat(2, 1fr);
+ grid-template-columns: repeat(2, );
  grid-auto-rows: 24rem;
  gap: .5rem;
 
