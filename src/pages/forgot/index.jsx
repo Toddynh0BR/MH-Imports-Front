@@ -32,7 +32,10 @@ export function Forgot(){
   });
 
   async function handleSend(){
-   if (!email.trim()) return alert('Digite seu email para prosseguir');
+   if (!email.trim()) return Toast.fire({
+    icon: "warning",
+    title: 'Digite seu email para prosseguir'
+  }); 
    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
    if (!emailRegex.test(email)) return Toast.fire({
