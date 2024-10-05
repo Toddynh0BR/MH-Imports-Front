@@ -98,7 +98,7 @@ export function Redefine(){
       /> 
 
       <S.Main data-eye={passwordVisible}>
-        <Link to={-1}>
+        <Link to='/'>
          <span className="return">Voltar</span>
         </Link>
          <div className="box">

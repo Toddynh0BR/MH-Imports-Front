@@ -62,6 +62,7 @@ export function Card({ id, img, name, price, promotion, effect }) {
             name,
             price,
             promotion,
+            observation: '',
             variation: actualVariation,
             quantity: 1,
             total: itemPrice 
@@ -70,7 +71,7 @@ export function Card({ id, img, name, price, promotion, effect }) {
        
 
             let nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
-            const existingItemIndex = nowItems.findIndex(item => item.id === Number(id) && item.variation == actualVariation);
+            const existingItemIndex = nowItems.findIndex(item => item.id === Number(id) && item.variation == actualVariation && item.observation == '');
 
             if (existingItemIndex !== -1) {
 

@@ -140,6 +140,7 @@ Itens do pedido:  ${orders.map(item => (
  Em promoção: ${ item.promotion ? `-%${item.promotion}` : "Não"},
  Variação: ${item.variation ? item.variation : 'Padrão'},
  Quantidade de itens: ${item.quantity},
+ Observação: ${item.observation ? item.observation : 'Nenhuma'},
  Total do item: R$${formatarComoDecimal(item.total)}.
  `
 )).join('')}

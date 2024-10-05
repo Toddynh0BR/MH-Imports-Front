@@ -28,6 +28,7 @@ export function Product() {
   const [category, setCategory] = useState('');
   const [promotion, setPromotion] = useState('');
   
+  const [observation, setObservation] = useState('');
   const [numberSelected, setNumber] = useState(1);
   const [selectedImg, setImg] = useState(null);
   const [img1, setImg1] = useState(null);
@@ -136,13 +137,14 @@ export function Product() {
       name,
       price: itemPrice,
       promotion,
+      observation: observation,
       variation: actualVariation,
       quantity,
       total: itemPrice * quantity
     };
 
     let nowItems = JSON.parse(localStorage.getItem('@Items')) || [];
-    const existingItemIndex = nowItems.findIndex(item => item.id === Number(id) && item.variation == actualVariation);
+    const existingItemIndex = nowItems.findIndex(item => item.id === Number(id) && item.variation == actualVariation && item.observation == observation);
 
     if (existingItemIndex !== -1) {
       nowItems[existingItemIndex].quantity += quantity;
@@ -280,7 +282,12 @@ export function Product() {
                 </div>
               )}
 
-              <textarea name="info" placeholder="Inclua algum detalhe para este produto (opcional)" />
+              <textarea 
+               name="info" 
+               value={observation}
+               placeholder="Inclua algum detalhe para este produto (opcional)" 
+               onChange={(e)=> setObservation(e.target.value)}
+              />
 
               <div className="config">
                 <div className="quantity">
