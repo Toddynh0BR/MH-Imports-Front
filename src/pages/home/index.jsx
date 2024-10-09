@@ -240,7 +240,8 @@ export function Home() {
       <S.Ads>
          <div className="ads">
             { slidesPerView === 5.5 ? 
-                <Swiper
+             posterDesk.length ?
+              <Swiper
                 pagination={false}
                 slidesPerView={1}
                 spaceBetween={30} 
@@ -249,22 +250,20 @@ export function Home() {
                 autoplay={{ delay: 2000, disableOnInteraction: false }} 
                 speed={1000} 
                 >
-                {posterDesk.length ?
+                {
                  posterDesk.map(poster => (
                   <SwiperSlide key={poster.id}>
                    <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
                   </SwiperSlide>
                   ))
-                            
-                :
-                  <div className="nonADS">
-                   <img src={Non} alt="MHimports" />
-                  </div>
                 }
-                </Swiper>
-   
+              </Swiper>
+             :
+              <div className="nonADS">
+               <img src={Non} alt="MHimports" />
+              </div>
             :
-             
+             postersMobal.length ?
               <Swiper
                pagination={false}
                slidesPerView={0}
@@ -275,19 +274,18 @@ export function Home() {
                speed={1000} 
                direction="horizontal"
               >
-              {postersMobal.length ?
+              {
                 postersMobal.map(poster => (
                  <SwiperSlide key={poster.id}>
                   <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
                  </SwiperSlide>
                 ))
-              :
-               <div className="nonADSM">
-                <img src={NonMobal} alt="MHimports" />
-               </div>
               }
-             </Swiper>
-        
+              </Swiper>
+             :
+              <div className="nonADSM">
+               <img src={NonMobal} alt="MHimports" />
+              </div>
             }     
 
          </div>
