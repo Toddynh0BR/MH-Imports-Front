@@ -42,7 +42,6 @@ export function Home() {
   const [menuOpen, setMenu] = useState(false);
   const [postersMobal, setMobalPoster] = useState([])
   const [posterDesk, setDeskPoster] = useState([])
-  const [poster, setPoster] = useState(false);
 
   function scrollToTop() {
     window.scrollTo({
@@ -110,7 +109,7 @@ export function Home() {
 
     setDeskPoster(DesktopFilter.length ? DesktopFilter : []);
     setMobalPoster(MobalFilter.length ? MobalFilter : []);
-    setPoster(true)
+
    }
   };
 
@@ -240,48 +239,55 @@ export function Home() {
 
       <S.Ads>
          <div className="ads">
-            { slidesPerView == 5.5 ? 
-             posterDesk.length ?
-              posterDesk.map(poster => (
+            { slidesPerView === 5.5 ? 
                 <Swiper
-                 pagination={false}
-                 slidesPerView={1}
-                 spaceBetween={30} 
-                 loop={true}
-                 modules={[Autoplay, Pagination, Navigation]}
-                 autoplay={{ delay: 5000, disableOnInteraction: false }} 
-                 speed={1000} 
+                pagination={false}
+                slidesPerView={1}
+                spaceBetween={30} 
+                loop={true}
+                modules={[Autoplay, Pagination, Navigation]}
+                autoplay={{ delay: 2000, disableOnInteraction: false }} 
+                speed={1000} 
                 >
-                 <SwiperSlide key={poster.id}>
-                  <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
-                 </SwiperSlide>
+                {posterDesk.length ?
+                 posterDesk.map(poster => (
+                  <SwiperSlide key={poster.id}>
+                   <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
+                  </SwiperSlide>
+                  ))
+                            
+                :
+                  <div className="nonADS">
+                   <img src={Non} alt="MHimports" />
+                  </div>
+                }
                 </Swiper>
-              ))
-             :
-              <div className="nonADS">
-               <img src={Non} alt="MHimports" />
-              </div>
+   
             :
-             postersMobal.length ?
-              postersMobal.map(poster => (
-                <Swiper
-                 pagination={false}
-                 slidesPerView={1}
-                 spaceBetween={30} 
-                 loop={true}
-                 modules={[Autoplay, Pagination, Navigation]}
-                 autoplay={{ delay: 5000, disableOnInteraction: false }} 
-                 speed={1000} 
-                >
+             
+              <Swiper
+               pagination={false}
+               slidesPerView={0}
+               spaceBetween={30} 
+               loop={true}
+               modules={[Autoplay, Pagination, Navigation]}
+               autoplay={{ delay: 5000, disableOnInteraction: false }} 
+               speed={1000} 
+               direction="horizontal"
+              >
+              {postersMobal.length ?
+                postersMobal.map(poster => (
                  <SwiperSlide key={poster.id}>
                   <img src={`${api.defaults.baseURL}/files/${poster.img}`} alt="anuncio" />
                  </SwiperSlide>
-                </Swiper>
-              ))
-             :
-             <div className="nonADSM">
-              <img src={NonMobal} alt="MHimports" />
-             </div>
+                ))
+              :
+               <div className="nonADSM">
+                <img src={NonMobal} alt="MHimports" />
+               </div>
+              }
+             </Swiper>
+        
             }     
 
          </div>
