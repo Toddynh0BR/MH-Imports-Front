@@ -266,7 +266,7 @@ export function Home() {
              postersMobal.length ?
               <Swiper
                pagination={false}
-               slidesPerView={0}
+               slidesPerView={1}
                spaceBetween={30} 
                loop={true}
                modules={[Autoplay, Pagination, Navigation]}
