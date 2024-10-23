@@ -136,9 +136,9 @@ export function Home() {
 
   const sortedCategories = categories.sort((a, b) => b.name.length - a.name.length);
   /*organia as categorias da maior a menor para manter organizadas*/
-  const promotionProducts = Products.filter(product => product.promotion !== 0 && product.promotion !== null);
+  const promotionProducts = Products.filter(product => product.promotion != 0 && product.promotion != '' && product.promotion != null);
   /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem promotion*/
-  const highProducts = Products.filter(product => product.high == 1);
+  const highProducts = Products.filter(product => product.high != 0);
  /*separa e guarda dentro de uma const apenas os produtos da array Products que possuem high*/
 
   useEffect(() => {

@@ -299,6 +299,7 @@ z-index: 10;
  text-transform: uppercase;
  font-weight: 600;
  color: #1e3483;
+ user-select: none;
  }
 }
 
@@ -327,6 +328,7 @@ z-index: 10;
  span {
  font-size: 1.4rem;
  font-weight: 500;
+ user-select: none;
  }
 
  &:hover {
@@ -352,6 +354,7 @@ z-index: 10;
   width: 0;
   height: 0rem;
   font-size: 0;
+  user-select: none;
 
   transition: .3s ease-in-out;
   justify-content: space-between;
@@ -405,6 +408,7 @@ z-index: 10;
   transition: .3s ease-in-out;
  font-size: 1.4rem;
  font-weight: 500;
+ user-select: none;
  }
 
  .Orders {
@@ -429,6 +433,7 @@ z-index: 10;
  align-items: center;
  display: flex;
  gap: .5rem;
+ user-select: none;
  
  background-color: rgb(235, 232, 232) ;
  padding-left: 0rem;
@@ -466,6 +471,7 @@ z-index: 10;
  opacity: 1;
  font-size: 1.4rem;
  padding: .5rem 1.5rem;
+ user-select: none;
  }
  }
  };
@@ -484,6 +490,7 @@ z-index: 10;
  padding: .5rem 1.5rem;
  font-size: 1.4rem;
  display: flex;
+ user-select: none;
  }
  }
  }
